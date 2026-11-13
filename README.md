@@ -1,4 +1,7 @@
-# print-kit
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="brand/banner/banner-dark.svg">
+  <img alt="print-kit: OpenSCAD parts for your own 3D printer" src="brand/banner/banner-light.svg" width="100%">
+</picture>
 
 A Claude Code plugin for designing parametric OpenSCAD parts for your own 3D printer.
 
@@ -23,7 +26,7 @@ Gridfinity bins.
 ## Install
 
 ```
-/plugin marketplace add <github-user>/print-kit
+/plugin marketplace add jasoncronje/print-kit
 /plugin install print-kit@print-kit
 ```
 
@@ -83,6 +86,10 @@ my-prints/
     README.md
     CHANGELOG.md
 ```
+
+## Brand
+
+Logo, palette and usage: [brand/](brand/README.md).
 
 ## Credits
 
