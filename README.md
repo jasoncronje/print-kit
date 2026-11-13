@@ -46,35 +46,64 @@ printer, and writes `print-kit.json` and a `data/` folder. Start a new session (
 Design a stand for my phone. Start with a fit test for the cradle.
 ```
 
-Setup installs OpenSCAD for you, with no admin rights: Homebrew on a Mac that has it, otherwise
-the official snapshot from openscad.org into your user folder. print-kit's tools are plain Python
-3.9+ with no packages. A slicer is optional: without one, the viewer saves the plate's `.3mf`.
-
-| | Needs | Setup handles |
-|---|---|---|
-| macOS | nothing extra | Python (via Homebrew or Apple's Command Line Tools) and OpenSCAD |
-| Windows | [Git for Windows](https://git-scm.com/downloads/win) (Claude Code's Bash) | Python (`winget`, no admin) and OpenSCAD |
-| Ubuntu / Linux | Python 3, already there on Ubuntu | OpenSCAD (x86-64; other CPUs use your package manager) |
-
-Every push is tested on fresh macOS, Windows and Ubuntu machines: OpenSCAD install, model checks,
-viewer build and the session hook.
-
-While the repo is private, you need read access and a GitHub login git can use (`gh auth login`).
+print-kit's tools are plain Python 3.9+ with no packages. Setup installs what's missing, with no
+admin rights. A slicer is optional: without one, the viewer saves the plate's `.3mf`.
 
 <details>
-<summary><b>Check or install by hand</b></summary>
+<summary><b>macOS</b></summary>
+
+**You need:** nothing extra.
+
+**Setup handles:** Python (via Homebrew or Apple's Command Line Tools) and OpenSCAD (Homebrew if
+you have it, otherwise the official snapshot from openscad.org into your user folder).
+
+To install OpenSCAD yourself:
+
+```bash
+brew install --cask openscad@snapshot   # the stable cask is disabled
+```
+
+</details>
+
+<details>
+<summary><b>Windows</b></summary>
+
+**You need:** [Git for Windows](https://git-scm.com/downloads/win), which gives Claude Code its Bash.
+
+**Setup handles:** Python (`winget`, no admin) and OpenSCAD (the official snapshot from
+openscad.org into your user folder).
+
+To install OpenSCAD yourself:
+
+```bash
+winget install OpenSCAD.OpenSCAD
+```
+
+</details>
+
+<details>
+<summary><b>Ubuntu / Linux</b></summary>
+
+**You need:** Python 3, already there on Ubuntu.
+
+**Setup handles:** OpenSCAD on x86-64 (the official snapshot from openscad.org into your user
+folder). On other CPUs, use your package manager.
+
+To install OpenSCAD yourself:
+
+```bash
+sudo apt install openscad   # Debian/Ubuntu: older 2021 release, slower
+```
+
+</details>
+
+<details>
+<summary><b>Check or fix an install</b></summary>
 
 To see what's installed, ask Claude to "run the print-kit doctor".
 
-Install OpenSCAD yourself, from https://openscad.org/downloads.html or:
-
-```bash
-brew install --cask openscad@snapshot   # macOS (the stable cask is disabled)
-sudo apt install openscad               # Debian/Ubuntu (older 2021 release, slower)
-winget install OpenSCAD.OpenSCAD        # Windows
-```
-
-If it isn't on your PATH, set `"openscad": "/full/path/to/openscad"` in `print-kit.json`.
+OpenSCAD downloads for every system: https://openscad.org/downloads.html. If it isn't on your
+PATH, set `"openscad": "/full/path/to/openscad"` in `print-kit.json`.
 
 For `https://<name>.localhost` viewer URLs, install [Portless](https://github.com/vercel-labs/portless)
 (`npm install -g portless`) and say yes when setup offers it.
@@ -91,6 +120,11 @@ For `https://<name>.localhost` viewer URLs, install [Portless](https://github.co
 Then restart Claude Code.
 
 </details>
+
+Every push is tested on fresh macOS, Windows and Ubuntu machines: OpenSCAD install, model checks,
+viewer build and the session hook.
+
+While the repo is private, you need read access and a GitHub login git can use (`gh auth login`).
 
 ## Your profile
 
