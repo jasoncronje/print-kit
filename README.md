@@ -214,7 +214,7 @@ viewer build and the session hook.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="brand/viewer-dark.jpg">
-  <img alt="The 3D viewer: a box and lid pulled apart, with a parts list and a floor grid" src="brand/viewer-light.jpg" width="100%">
+  <img alt="The 3D viewer showing an Apple Watch nightstand stand pulled apart, with its parts list and sizes" src="brand/viewer-light.jpg" width="100%">
 </picture>
 
 Every design gets an interactive 3D page, built by Claude and opened inside Claude Code. Ask for it
