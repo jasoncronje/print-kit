@@ -26,7 +26,8 @@ Stands, docks, enclosures, mounts, Gridfinity bins and keyboard parts, all desig
 
 ## Install
 
-### 1. Claude Code
+<details>
+<summary><b>1. Claude Code</b></summary>
 
 Skip this if you already have it.
 
@@ -35,7 +36,10 @@ curl -fsSL https://claude.ai/install.sh | bash
 claude --version
 ```
 
-### 2. OpenSCAD
+</details>
+
+<details>
+<summary><b>2. OpenSCAD</b></summary>
 
 ```bash
 # macOS (the stable cask is disabled in Homebrew; the snapshot is also much faster)
@@ -60,7 +64,10 @@ On macOS, if `openscad` isn't found after installing the app:
 ln -s /Applications/OpenSCAD.app/Contents/MacOS/OpenSCAD "$(brew --prefix)/bin/openscad"
 ```
 
-### 3. Python
+</details>
+
+<details>
+<summary><b>3. Python</b></summary>
 
 Python 3.9 or newer. Pillow is only needed for the photo-trace editor.
 
@@ -69,7 +76,10 @@ python3 --version
 python3 -m pip install pillow
 ```
 
-### 4. A slicer (optional)
+</details>
+
+<details>
+<summary><b>4. A slicer (optional)</b></summary>
 
 Lets the viewer's "Open in slicer" button open a plate directly. Without one, the button saves the `.3mf`.
 
@@ -81,7 +91,10 @@ brew install --cask prusaslicer
 brew install --cask ultimaker-cura
 ```
 
-### 5. The plugin
+</details>
+
+<details>
+<summary><b>5. The plugin</b></summary>
 
 Inside Claude Code:
 
@@ -99,7 +112,10 @@ claude plugin install print-kit@print-kit --scope user
 
 While the repo is private, you need read access and a GitHub login git can use (`gh auth login`).
 
-### 6. Your projects folder
+</details>
+
+<details>
+<summary><b>6. Your projects folder</b></summary>
 
 ```bash
 mkdir -p ~/prints && cd ~/prints
@@ -116,13 +132,19 @@ Then, inside Claude Code:
 It checks for OpenSCAD and your slicer, asks a few questions, and writes `print-kit.json` and a `data/` folder.
 Start a new session (or `/clear`) afterwards so the rules load.
 
-### 7. Try it
+</details>
+
+<details>
+<summary><b>7. Try it</b></summary>
 
 ```
 Design a stand for my phone. Start with a fit test for the cradle.
 ```
 
-### Updating
+</details>
+
+<details>
+<summary><b>Updating</b></summary>
 
 ```bash
 claude plugin marketplace update print-kit
@@ -131,7 +153,10 @@ claude plugin update print-kit@print-kit
 
 Restart Claude Code to load the new version.
 
-### Optional: Portless
+</details>
+
+<details>
+<summary><b>Optional: Portless</b></summary>
 
 For `https://<name>.localhost` viewer URLs instead of `http://127.0.0.1:<port>`:
 
@@ -140,6 +165,8 @@ npm install -g portless
 ```
 
 Then answer yes when setup offers it, or set `"server": {"launcher": "portless"}` in `print-kit.json`.
+
+</details>
 
 macOS is the tested platform. Linux and Windows should work with the matching `open_command`
 (setup fills it in).
