@@ -18,6 +18,7 @@ Save then goes to the artifact store doc instead.
 """
 
 import json
+import struct
 import shutil
 import sys
 from pathlib import Path
@@ -28,12 +29,26 @@ REQUIRED = ["title", "photo", "px_per_in", "clearance_mm", "store_doc", "draft_k
 
 
 def photo_size(path):
-    try:
-        from PIL import Image
-    except ImportError:
-        sys.exit("Pillow is needed to read the photo size (pip install pillow)")
-    with Image.open(path) as im:
-        return im.size
+    """(width, height) of a JPEG or PNG, read from its header (no Pillow needed)."""
+    data = Path(path).read_bytes()
+    if data[:8] == b"\x89PNG\r\n\x1a\n":
+        return struct.unpack(">II", data[16:24])
+    if data[:2] == b"\xff\xd8":
+        i = 2
+        while i < len(data) - 9:
+            if data[i] != 0xFF:
+                i += 1
+                continue
+            marker = data[i + 1]
+            if marker in (0xD8, 0x01) or 0xD0 <= marker <= 0xD7:
+                i += 2
+                continue
+            seg = struct.unpack(">H", data[i + 2:i + 4])[0]
+            if 0xC0 <= marker <= 0xCF and marker not in (0xC4, 0xC8, 0xCC):
+                h, w = struct.unpack(">HH", data[i + 5:i + 9])
+                return w, h
+            i += 2 + seg
+    sys.exit(f"{path}: not a JPEG or PNG")
 
 
 def build(project):

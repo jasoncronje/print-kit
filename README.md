@@ -26,150 +26,61 @@ Stands, docks, enclosures, mounts, Gridfinity bins and keyboard parts, all desig
 
 ## Install
 
-<details>
-<summary><b>1. Claude Code</b></summary>
-
-Skip this if you already have it.
-
-```bash
-curl -fsSL https://claude.ai/install.sh | bash
-claude --version
-```
-
-</details>
-
-<details>
-<summary><b>2. OpenSCAD</b></summary>
-
-```bash
-# macOS (the stable cask is disabled in Homebrew; the snapshot is also much faster)
-brew install --cask openscad@snapshot
-
-# Linux (Debian/Ubuntu)
-sudo apt install openscad
-
-# Windows
-winget install OpenSCAD.OpenSCAD
-```
-
-Check it's on your PATH:
-
-```bash
-openscad --version
-```
-
-On macOS, if `openscad` isn't found after installing the app:
-
-```bash
-ln -s /Applications/OpenSCAD.app/Contents/MacOS/OpenSCAD "$(brew --prefix)/bin/openscad"
-```
-
-</details>
-
-<details>
-<summary><b>3. Python</b></summary>
-
-Python 3.9 or newer. Pillow is only needed for the photo-trace editor.
-
-```bash
-python3 --version
-python3 -m pip install pillow
-```
-
-</details>
-
-<details>
-<summary><b>4. A slicer (optional)</b></summary>
-
-Lets the viewer's "Open in slicer" button open a plate directly. Without one, the button saves the `.3mf`.
-
-```bash
-# macOS, pick yours
-brew install --cask bambu-studio
-brew install --cask orcaslicer
-brew install --cask prusaslicer
-brew install --cask ultimaker-cura
-```
-
-</details>
-
-<details>
-<summary><b>5. The plugin</b></summary>
-
-Inside Claude Code:
+You need [Claude Code](https://claude.com/claude-code). Then, inside it:
 
 ```
 /plugin marketplace add jasoncronje/print-kit
 /plugin install print-kit@print-kit
 ```
 
-Or from your terminal:
-
-```bash
-claude plugin marketplace add jasoncronje/print-kit
-claude plugin install print-kit@print-kit --scope user
-```
-
-While the repo is private, you need read access and a GitHub login git can use (`gh auth login`).
-
-</details>
-
-<details>
-<summary><b>6. Your projects folder</b></summary>
-
-```bash
-mkdir -p ~/prints && cd ~/prints
-git init          # optional, but print-kit commits your changes when it's a repo
-claude
-```
-
-Then, inside Claude Code:
+Open the folder you keep your prints in (any folder, ideally a git repo) and run:
 
 ```
 /print-kit:setup
 ```
 
-It checks for OpenSCAD and your slicer, asks a few questions, and writes `print-kit.json` and a `data/` folder.
-Start a new session (or `/clear`) afterwards so the rules load.
-
-</details>
-
-<details>
-<summary><b>7. Try it</b></summary>
+Setup finds OpenSCAD and your slicer, offers to install OpenSCAD if it's missing, asks about your
+printer, and writes `print-kit.json` and a `data/` folder. Start a new session (or `/clear`) and try:
 
 ```
 Design a stand for my phone. Start with a fit test for the cradle.
 ```
+
+The only dependency is OpenSCAD. The tools are plain Python 3.9+ with no packages. A slicer is
+optional: without one, the viewer saves the plate's `.3mf` instead of opening it.
+
+While the repo is private, you need read access and a GitHub login git can use (`gh auth login`).
+
+<details>
+<summary><b>Check or install by hand</b></summary>
+
+To see what's installed, ask Claude to "run the print-kit doctor".
+
+Install OpenSCAD yourself:
+
+```bash
+brew install --cask openscad@snapshot   # macOS (the stable cask is disabled)
+sudo apt install openscad               # Debian/Ubuntu
+winget install OpenSCAD.OpenSCAD        # Windows
+```
+
+For `https://<name>.localhost` viewer URLs, install [Portless](https://github.com/vercel-labs/portless)
+(`npm install -g portless`) and say yes when setup offers it.
 
 </details>
 
 <details>
 <summary><b>Updating</b></summary>
 
-```bash
-claude plugin marketplace update print-kit
-claude plugin update print-kit@print-kit
+```
+/plugin marketplace update print-kit
 ```
 
-Restart Claude Code to load the new version.
+Then restart Claude Code.
 
 </details>
 
-<details>
-<summary><b>Optional: Portless</b></summary>
-
-For `https://<name>.localhost` viewer URLs instead of `http://127.0.0.1:<port>`:
-
-```bash
-npm install -g portless
-```
-
-Then answer yes when setup offers it, or set `"server": {"launcher": "portless"}` in `print-kit.json`.
-
-</details>
-
-macOS is the tested platform. Linux and Windows should work with the matching `open_command`
-(setup fills it in).
+macOS is the tested platform. Linux and Windows should work; setup fills in the slicer command.
 
 ## Your profile
 

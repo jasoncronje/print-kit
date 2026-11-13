@@ -1,6 +1,11 @@
 # Changelog
 
 ## 2026-11-12
+- Install cut to two plugin commands plus `/print-kit:setup`. New `tools/doctor.py` checks Python,
+  OpenSCAD (and the macOS app off PATH), slicers and Portless, and `--install` installs OpenSCAD with
+  brew, winget, apt, dnf, pacman or flatpak. Setup runs it and offers the install in its one question round.
+- Pillow dropped: the trace editor reads photo sizes from the file header, and `trace_overlay.py` writes
+  an SVG. Every tool is now standard-library Python; OpenSCAD is the only dependency.
 - README: install steps folded into collapsible sections.
 - README: short feature list instead of the parts table; step-by-step install with every command.
 - README: "Made with print-kit" gallery of 36 printed parts (9 x 4 grid).

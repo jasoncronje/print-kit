@@ -60,7 +60,8 @@ def main():
         return
     rules = (ROOT / "rules" / "house-rules.md").read_text()
     emit(f"{rules}\n\n## This user's profile\n\n{profile_summary(p)}\n\n"
-         f"`<tools>` above is {tools} (run its scripts with python3).")
+         f"`<tools>` above is {tools} (run its scripts with python3; `doctor.py` checks and installs "
+         "OpenSCAD).")
 
 
 if __name__ == "__main__":

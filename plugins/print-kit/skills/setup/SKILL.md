@@ -22,14 +22,25 @@ and change only what the user asks.
 
 ## 2. Ask (one short round, AskUserQuestion when available)
 
-Ask only what you can't find out. Detect first:
+Ask only what you can't find out. Detect first with one command:
 
-- OpenSCAD: `openscad --version`. Missing? Say how to install it (openscad.org, or
-  `brew install --cask openscad@snapshot` on macOS, `sudo apt install openscad`, `winget install OpenSCAD.OpenSCAD`) and continue.
-- Slicers on disk: macOS `/Applications/{BambuStudio,OrcaSlicer,PrusaSlicer,UltiMaker Cura}.app`;
-  Linux `which bambu-studio orca-slicer prusa-slicer cura`; Windows `Program Files`.
-- `portless` on PATH (`which portless`): offer `server.launcher = "portless"` if present.
-- Python: `python3 -c "import PIL"` (only the trace editor needs Pillow).
+```bash
+python3 ${CLAUDE_PLUGIN_ROOT}/tools/doctor.py --json
+```
+
+It reports Python, OpenSCAD (also the macOS app when it isn't on PATH), installed slicers with
+their `open_command`, and Portless. Every print-kit tool is standard-library Python; OpenSCAD is
+the only real dependency.
+
+- **OpenSCAD missing, or found but not on PATH:** say so in one line, show the `openscad.install`
+  command it reports, and ask once (in the same question round below) whether to install it. On
+  yes, run `python3 ${CLAUDE_PLUGIN_ROOT}/tools/doctor.py --install` (it installs, then links the
+  binary onto PATH on macOS). `sudo` on Linux prompts in their terminal: if it can't, give them the
+  command to run. No package manager: point to https://openscad.org/downloads.html. Don't stop
+  setup for it.
+- **Slicers:** use the detected ones to preselect the slicer question and fill `open_command`.
+  None found: the viewer saves `.3mf` files instead; don't install one.
+- **Portless** present: offer `server.launcher = "portless"`. Absent: leave `"plain"`, don't mention it.
 
 Then ask:
 
@@ -55,8 +66,8 @@ Then ask:
 | PrusaSlicer | `["open", "-n", "-a", "PrusaSlicer", "--args", "{file}"]` | `["prusa-slicer", "{file}"]` | `["C:\\Program Files\\Prusa3D\\PrusaSlicer\\prusa-slicer.exe", "{file}"]` |
 | Cura | `["open", "-n", "-a", "UltiMaker Cura", "--args", "{file}"]` | `["cura", "{file}"]` | path to `UltiMaker-Cura.exe` |
 
-`open -n` starts a separate window so their open project isn't replaced. Check the path exists
-before writing it.
+`open -n` starts a separate window so their open project isn't replaced. Prefer the command the
+doctor reported for a detected slicer; otherwise check the path exists before writing it.
 
 ## 4. Write
 
