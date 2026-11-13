@@ -116,7 +116,9 @@ def report():
         "platform": SYSTEM,
         "python": {"ok": sys.version_info >= (3, 9), "version": platform.python_version(), "path": sys.executable},
         "openscad": {"ok": bool(scad), "path": scad, "version": ver, "on_path": bool(shutil.which("openscad")),
-                     "install": install_plan()},
+                     "install": install_plan(),
+                     "missing_libs": missing_libs(OWN_DIR / "squashfs-root" / "AppRun")
+                     if not scad and (OWN_DIR / "squashfs-root" / "AppRun").exists() else []},
         "slicers": find_slicers(),
         "portless": bool(shutil.which("portless")),
         "ready": bool(scad) and sys.version_info >= (3, 9),
@@ -205,12 +207,48 @@ def install_appimage(img):
                        f'exec "{OWN_DIR / "squashfs-root" / "AppRun"}" "$@"\n', encoding="utf-8")
     wrapper.chmod(0o755)
     img.unlink()
+    add_system_libs(OWN_DIR / "squashfs-root" / "AppRun")
     link = Path.home() / ".local" / "bin" / "openscad"
     if not link.exists():
         link.parent.mkdir(parents=True, exist_ok=True)
         link.symlink_to(wrapper)
         print(f"linked {link}")
     print(f"installed into {OWN_DIR}")
+
+
+# Shared libraries the AppImage expects from the system, and the Debian/Ubuntu package for each.
+# Desktop Ubuntu has them all; Server, minimal and container images often lack the graphics ones.
+LIB_PACKAGES = {
+    "libEGL.so.1": "libegl1", "libGL.so.1": "libgl1", "libOpenGL.so.0": "libopengl0",
+    "libGLX.so.0": "libglx0", "libfontconfig.so.1": "libfontconfig1", "libfreetype.so.6": "libfreetype6",
+    "libxkbcommon.so.0": "libxkbcommon0", "libX11.so.6": "libx11-6", "libxcb.so.1": "libxcb1",
+    "libglib-2.0.so.0": "libglib2.0-0", "libdbus-1.so.3": "libdbus-1-3",
+}
+
+
+def missing_libs(binary):
+    """System libraries `binary` can't find (Linux), from ldd."""
+    r = run(["ldd", str(binary)]) if shutil.which("ldd") else None
+    return sorted({ln.split("=>")[0].strip() for ln in (r.stdout.splitlines() if r else []) if "not found" in ln})
+
+
+def add_system_libs(binary):
+    """Install the apt packages for libraries OpenSCAD is missing; exit with the command if we can't."""
+    libs = missing_libs(binary)
+    if not libs:
+        return
+    pkgs = sorted({LIB_PACKAGES.get(lib, "?") for lib in libs})
+    print("OpenSCAD needs system libraries this machine lacks: " + ", ".join(libs), flush=True)
+    if "?" in pkgs or not shutil.which("apt-get"):
+        sys.exit("Install the packages that provide them with your package manager, then run doctor.py again.")
+    cmd = ["sudo", "apt-get", "install", "-y", "--no-install-recommends"] + pkgs
+    probe = run(["sudo", "-n", "true"])
+    if probe and probe.returncode == 0:   # passwordless sudo (containers, CI); otherwise the user runs it
+        print("running:", " ".join(cmd), flush=True)
+        if subprocess.run(["sudo", "-n", "apt-get", "update", "-qq"]).returncode == 0 and \
+                subprocess.run(["sudo", "-n"] + cmd[1:]).returncode == 0:
+            return
+    sys.exit("Run this in a terminal (it asks for your password), then run doctor.py again:\n  " + " ".join(cmd))
 
 
 def link_on_mac(path):
@@ -246,7 +284,11 @@ def main():
     rep = report()
     if "--install" in args:
         if not rep["openscad"]["ok"]:
-            install()
+            app_run = OWN_DIR / "squashfs-root" / "AppRun"
+            if SYSTEM == "Linux" and app_run.exists():
+                add_system_libs(app_run)   # installed before, but the system libraries were missing
+            else:
+                install()
         scad, _ = find_openscad()
         if scad:
             link_on_mac(scad)

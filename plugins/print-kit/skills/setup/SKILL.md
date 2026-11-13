@@ -44,6 +44,10 @@ sh ${CLAUDE_PLUGIN_ROOT}/scripts/py.sh ${CLAUDE_PLUGIN_ROOT}/tools/doctor.py --j
   files.openscad.org (about 80-100 MB, SHA-256 checked) into a per-user folder. The download
   takes a minute or two; run it with a 10 minute timeout. Only Linux on a non-x86 CPU falls back
   to apt/dnf/pacman with sudo: if that fails, give the user the command to run in a terminal.
+  Ubuntu Server and minimal installs may lack graphics libraries (`libegl1` and friends) the
+  snapshot needs: `--install` installs them when sudo needs no password, else it prints the
+  exact `sudo apt-get install` line. Give the user that line to run in a terminal, then rerun
+  `--install` (`openscad.missing_libs` in the JSON lists what's missing).
   `install` is null: point to https://openscad.org/downloads.html. Don't stop setup for it.
 - **Slicers:** use the detected ones to preselect the slicer question and fill `open_command`.
   None found: the viewer saves `.3mf` files instead; don't install one.

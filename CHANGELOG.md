@@ -11,6 +11,8 @@
 - `kit_profile.openscad()` finds OpenSCAD off PATH (profile `openscad`, app folders, print-kit's own install;
   `openscad.com` on Windows so output is captured); check_scad and make_viewer use it. The session context
   names this machine's Python and OpenSCAD.
+- Linux: `doctor.py` finds system libraries the OpenSCAD AppImage lacks (CI's Ubuntu had no `libEGL.so.1`)
+  with ldd and installs the apt packages when sudo is passwordless, else prints the exact command.
 - All text files read and written as UTF-8, OpenSCAD output decoded as UTF-8 (Windows defaults to cp1252).
 - Install cut to two plugin commands plus `/print-kit:setup`. New `tools/doctor.py` checks Python,
   OpenSCAD (and the macOS app off PATH), slicers and Portless, and `--install` installs OpenSCAD with
