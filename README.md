@@ -59,6 +59,14 @@ Pick your system. Each guide is the whole install, first step to first part.
    Design a stand for my phone. Start with a fit test for the cradle.
    ```
 
+5. See it in 3D:
+
+   ```
+   Show me the stand in the 3D viewer.
+   ```
+
+   In the Claude Code desktop app it opens beside the chat. In the terminal you get a link.
+
 Rather install OpenSCAD yourself? Do it before step 3 and setup will use it:
 
 ```bash
@@ -100,6 +108,14 @@ brew install --cask openscad@snapshot   # the stable cask is disabled
    Design a stand for my phone. Start with a fit test for the cradle.
    ```
 
+5. See it in 3D:
+
+   ```
+   Show me the stand in the 3D viewer.
+   ```
+
+   In the Claude Code desktop app it opens beside the chat. In the terminal you get a link.
+
 Rather install OpenSCAD yourself? Do it before step 4 and setup will use it:
 
 ```bash
@@ -140,6 +156,14 @@ winget install OpenSCAD.OpenSCAD
    ```
    Design a stand for my phone. Start with a fit test for the cradle.
    ```
+
+5. See it in 3D:
+
+   ```
+   Show me the stand in the 3D viewer.
+   ```
+
+   In the Claude Code desktop app it opens beside the chat. In the terminal you get a link.
 
 Rather install OpenSCAD yourself? Do it before step 4 and setup will use it:
 
@@ -185,6 +209,26 @@ For `https://<name>.localhost` viewer URLs instead of a port number:
 
 Every push is tested on fresh macOS, Windows and Ubuntu machines: OpenSCAD install, model checks,
 viewer build and the session hook.
+
+## The 3D viewer
+
+Every design gets an interactive 3D page, built by Claude and opened inside Claude Code. Ask for it
+in plain words:
+
+```
+Show me the phone stand in the 3D viewer.
+```
+
+- **In the Claude Code desktop app** it opens in the preview pane, beside the chat.
+- **In the terminal** Claude gives you a link to open in your browser.
+
+What you can do there:
+
+- **Look at the assembled model.** Spin it, pull the parts apart, cut through it, X-ray it, and measure between two points.
+- **Check the print plates.** Each plate is laid out on your printer's bed, with overhangs marked in red.
+- **Send a plate to your slicer.** One button opens it there. Without a slicer, it saves the plate's `.3mf`.
+
+The viewer closes itself about 5 minutes after you close its tab. Ask again to bring it back.
 
 ## Your profile
 
