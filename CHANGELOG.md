@@ -1,6 +1,10 @@
 # Changelog
 
 ## 2026-11-13
+- `check_scad.py` and `make_viewer.py` stop with "run /print-kit:setup" when no profile sets
+  `printer.bed_mm`, instead of quietly checking against the default 220 mm bed (a part could pass
+  for a bed the user doesn't have). A viewer config with its own `bed` still builds. `doctor.py`
+  and the viewer server need no profile, as before.
 - Viewer: the redesign from 3d-printz ported in. Open side columns around a framed stage, crease lines
   on parts, floor grid in the assembled view (G), flat bed in `bed_color` with an exact 10 mm grid,
   whole-bed framing for big plates, Show all in both modes, phone and tablet layouts, mode and plate

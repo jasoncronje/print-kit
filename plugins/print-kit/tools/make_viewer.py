@@ -95,6 +95,8 @@ def build(project):
     project = project.resolve()
     cfg_path = project / "viewer" / "config.json"
     cfg = json.loads(cfg_path.read_text(encoding="utf-8"))
+    if "bed" not in cfg:
+        kit.require_bed(project)   # before any export: the plates are drawn on this bed
     scad_file = cfg.get("scad")
     fn = cfg.get("fn")
 

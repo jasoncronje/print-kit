@@ -8,7 +8,8 @@ Lookup, first hit wins:
   1. print-kit.json in <path> or any folder above it (the workspace profile),
   2. $PRINT_KIT_PROFILE,
   3. ~/.config/print-kit/print-kit.json (the user-wide profile).
-Missing keys fall back to DEFAULTS, so an old or partial profile still works.
+Missing keys fall back to DEFAULTS, so an old or partial profile still works. The bed size is the
+exception: tools that size parts against it call require_bed(), which stops when no profile sets it.
 The /print-kit:setup skill writes the file.
 """
 
@@ -108,6 +109,17 @@ def workspace(start=None):
 def bed(start=None):
     b = load(start)["printer"]["bed_mm"]
     return tuple(float(x) for x in (list(b) + [b[-1]] * 3)[:3])
+
+
+def require_bed(start=None):
+    """Stop unless a profile sets the bed size: a guessed bed passes parts that don't fit the real one."""
+    path = find(start)
+    if path and (json.loads(path.read_text(encoding="utf-8")).get("printer") or {}).get("bed_mm"):
+        return
+    where = f"{path} has no printer.bed_mm" if path else f"no {NAME} here, above, or in {USER_FILE.parent}"
+    sys.exit(f"print-kit: {where}, so the bed size is unknown.\n"
+             "Run /print-kit:setup in Claude Code (it asks about the printer and writes the file), "
+             "then run this again.")
 
 
 def data_home():

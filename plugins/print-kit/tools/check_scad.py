@@ -433,6 +433,7 @@ def main():
     only = [s.strip() for s in a.part.split(",")] if a.part else None
     jobs = [j for d in dirs for j in project_jobs(d, only, a.fn, a.all)]
     for j in jobs:
+        kit.require_bed(j["dir"])
         j["bed"] = kit.bed(j["dir"])
     if not jobs:
         sys.exit("no parts to check")
