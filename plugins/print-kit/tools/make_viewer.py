@@ -25,7 +25,6 @@ import datetime
 import hashlib
 import json
 import re
-import shutil
 import struct
 import subprocess
 import sys
@@ -36,7 +35,7 @@ TOOLS = Path(__file__).resolve().parent
 TEMPLATE = TOOLS / "viewer" / "template.html"
 sys.path.insert(0, str(TOOLS))
 import kit_profile as kit  # noqa: E402
-OPENSCAD = shutil.which("openscad") or "openscad"
+OPENSCAD = kit.openscad()
 
 
 def ascii_to_binary(text):
@@ -85,7 +84,7 @@ def export_scad(project, scad_file, spec, fn):
     with tempfile.TemporaryDirectory() as tmp:
         out = Path(tmp) / "mesh.stl"
         args += ["-o", str(out), str(project / spec.get("file", scad_file))]
-        res = subprocess.run(args, capture_output=True, text=True)
+        res = subprocess.run(args, capture_output=True, text=True, encoding="utf-8", errors="replace")
         if res.returncode != 0 or not out.exists():
             sys.exit(f"OpenSCAD failed for {spec}:\n{res.stderr[-2000:]}")
         return out.read_bytes()
@@ -94,7 +93,7 @@ def export_scad(project, scad_file, spec, fn):
 def build(project):
     project = project.resolve()
     cfg_path = project / "viewer" / "config.json"
-    cfg = json.loads(cfg_path.read_text())
+    cfg = json.loads(cfg_path.read_text(encoding="utf-8"))
     scad_file = cfg.get("scad")
     fn = cfg.get("fn")
 
@@ -142,7 +141,7 @@ def build(project):
     cfg["meshes"] = meshes
 
     out_dir = project / "viewer"
-    (out_dir / "data.json").write_text(json.dumps(cfg, separators=(",", ":")))
+    (out_dir / "data.json").write_text(json.dumps(cfg, separators=(",", ":")), encoding="utf-8")
     size = (out_dir / "data.json").stat().st_size / 1024 / 1024
     shown = shown_path(out_dir)
     print(f"  -> {shown}/data.json ({size:.1f} MB)")
@@ -159,11 +158,11 @@ def shown_path(p):
 def write_page(project):
     """viewer/index.html: the template with the title filled in and data.json inline."""
     out_dir = project / "viewer"
-    cfg = json.loads((out_dir / "config.json").read_text())
-    data = (out_dir / "data.json").read_text().replace("</", "<\\/")
-    html = TEMPLATE.read_text().replace("__TITLE__", cfg.get("title", project.name))
+    cfg = json.loads((out_dir / "config.json").read_text(encoding="utf-8"))
+    data = (out_dir / "data.json").read_text(encoding="utf-8").replace("</", "<\\/")
+    html = TEMPLATE.read_text(encoding="utf-8").replace("__TITLE__", cfg.get("title", project.name))
     html = html.replace("<!--VIEWER_DATA-->", f'<script id="viewer-data" type="application/json">{data}</script>', 1)
-    (out_dir / "index.html").write_text(html)
+    (out_dir / "index.html").write_text(html, encoding="utf-8")
     shown = shown_path(out_dir)
     print(f"  -> {shown}/index.html (static, opens from disk; not kept in git)")
 

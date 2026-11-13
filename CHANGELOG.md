@@ -1,6 +1,17 @@
 # Changelog
 
 ## 2026-11-12
+- Windows and Ubuntu support, tested in CI (`.github/workflows/platforms.yml`: fresh macOS, Windows/Git Bash
+  and Ubuntu runners install OpenSCAD, check and view `tests/sample/coaster`, run the session hook).
+- `scripts/py.sh` finds a working Python 3.9+ (python3, python, py -3), skipping macOS's pre-CLT stub and
+  Windows' Store aliases; the session hook runs through it and, with no Python, tells Claude how to install one.
+- `doctor.py --install` needs no admin: brew on a Mac that has it, else the official files.openscad.org
+  snapshot (SHA-256 checked) as a .dmg into ~/Applications, a .zip into %LOCALAPPDATA%, or an unpacked
+  AppImage (no FUSE) linked as ~/.local/bin/openscad.
+- `kit_profile.openscad()` finds OpenSCAD off PATH (profile `openscad`, app folders, print-kit's own install;
+  `openscad.com` on Windows so output is captured); check_scad and make_viewer use it. The session context
+  names this machine's Python and OpenSCAD.
+- All text files read and written as UTF-8, OpenSCAD output decoded as UTF-8 (Windows defaults to cp1252).
 - Install cut to two plugin commands plus `/print-kit:setup`. New `tools/doctor.py` checks Python,
   OpenSCAD (and the macOS app off PATH), slicers and Portless, and `--install` installs OpenSCAD with
   brew, winget, apt, dnf, pacman or flatpak. Setup runs it and offers the install in its one question round.

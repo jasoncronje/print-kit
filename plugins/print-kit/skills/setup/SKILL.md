@@ -22,25 +22,35 @@ and change only what the user asks.
 
 ## 2. Ask (one short round, AskUserQuestion when available)
 
-Ask only what you can't find out. Detect first with one command:
+Ask only what you can't find out. Detect first with one command (it finds a working Python on
+macOS, Linux and Windows/Git Bash, where `python3` often isn't one):
 
 ```bash
-python3 ${CLAUDE_PLUGIN_ROOT}/tools/doctor.py --json
+sh ${CLAUDE_PLUGIN_ROOT}/scripts/py.sh ${CLAUDE_PLUGIN_ROOT}/tools/doctor.py --json
 ```
 
-It reports Python, OpenSCAD (also the macOS app when it isn't on PATH), installed slicers with
-their `open_command`, and Portless. Every print-kit tool is standard-library Python; OpenSCAD is
-the only real dependency.
-
-- **OpenSCAD missing, or found but not on PATH:** say so in one line, show the `openscad.install`
-  command it reports, and ask once (in the same question round below) whether to install it. On
-  yes, run `python3 ${CLAUDE_PLUGIN_ROOT}/tools/doctor.py --install` (it installs, then links the
-  binary onto PATH on macOS). `sudo` on Linux prompts in their terminal: if it can't, give them the
-  command to run. No package manager: point to https://openscad.org/downloads.html. Don't stop
-  setup for it.
+- **Exit 127: no Python 3.9+.** Every print-kit tool needs it (standard library only, no
+  packages). Say so in one line and offer the install, then rerun the command:
+  - macOS: `brew install python` if `brew` exists; else `xcode-select --install`, which opens a
+    system dialog the user clicks through (about 5 min).
+  - Windows: `winget install -e --id Python.Python.3.13 --scope user` (no admin). PATH only
+    updates in new shells: tell them to restart Claude Code, then run setup again.
+  - Ubuntu/Debian: it's almost always there; if not, the user runs `sudo apt install -y python3`
+    in a terminal (you can't answer sudo's password prompt).
+- **OpenSCAD missing:** say so in one line with the `openscad.install.describe` text it reports,
+  and ask once (in the question round below) whether to install it. On yes, run
+  `sh ${CLAUDE_PLUGIN_ROOT}/scripts/py.sh ${CLAUDE_PLUGIN_ROOT}/tools/doctor.py --install`.
+  It needs no admin rights: Homebrew on a Mac that has it, otherwise the official snapshot from
+  files.openscad.org (about 80-100 MB, SHA-256 checked) into a per-user folder. The download
+  takes a minute or two; run it with a 10 minute timeout. Only Linux on a non-x86 CPU falls back
+  to apt/dnf/pacman with sudo: if that fails, give the user the command to run in a terminal.
+  `install` is null: point to https://openscad.org/downloads.html. Don't stop setup for it.
 - **Slicers:** use the detected ones to preselect the slicer question and fill `open_command`.
   None found: the viewer saves `.3mf` files instead; don't install one.
 - **Portless** present: offer `server.launcher = "portless"`. Absent: leave `"plain"`, don't mention it.
+- Use the reported `python.path` and `openscad.path` for the rest of setup. When OpenSCAD isn't
+  on PATH (`on_path` false), commands in the skills that say `openscad` mean that path; new
+  sessions are told so automatically.
 
 Then ask:
 

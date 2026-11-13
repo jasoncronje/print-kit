@@ -1,0 +1,67 @@
+# Fresh-machine install test: no OpenSCAD on the runner, then everything a new user runs.
+# Windows steps run in Git Bash, the shell Claude Code uses there for Bash and hooks.
+name: platforms
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  install:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
+    env:
+      PY: sh plugins/print-kit/scripts/py.sh
+      T: plugins/print-kit/tools
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Launcher finds Python
+        run: $PY -c "import sys; print(sys.executable, sys.version)"
+
+      - name: Hook with no Python still tells Claude what to do
+        run: |
+          out=$(env -i PATH=/nonexistent "$(command -v sh)" plugins/print-kit/scripts/py.sh plugins/print-kit/scripts/session_context.py)
+          echo "$out" | $PY -c "import json,sys; c=json.load(sys.stdin)['hookSpecificOutput']['additionalContext']; assert 'no Python' in c; print(c[:80])"
+
+      - name: Doctor reports OpenSCAD missing
+        run: |
+          if $PY $T/doctor.py; then echo "expected OpenSCAD to be missing"; exit 1; fi
+          $PY $T/doctor.py --json
+
+      - name: Doctor installs OpenSCAD
+        timeout-minutes: 15
+        run: $PY $T/doctor.py --install
+
+      - name: Doctor says ready
+        run: $PY $T/doctor.py
+
+      - name: Check the sample project
+        run: $PY $T/check_scad.py tests/sample/coaster
+
+      - name: Build its viewer
+        run: |
+          $PY $T/make_viewer.py tests/sample/coaster
+          test -s tests/sample/coaster/viewer/data.json
+
+      - name: Viewer server answers
+        run: |
+          PORT=8765 $PY $T/viewer_server.py tests/sample/coaster/viewer > server.log 2>&1 &
+          for i in $(seq 1 20); do curl -fs http://127.0.0.1:8765/ -o page.html && break; sleep 1; done
+          grep -q Coaster page.html
+          curl -fs http://127.0.0.1:8765/data.json -o /dev/null
+          kill %1 || true
+          cat server.log
+
+      - name: Session hook names this machine's Python and OpenSCAD
+        run: |
+          echo '{}' | CLAUDE_PROJECT_DIR=tests/sample/coaster CLAUDE_PLUGIN_ROOT=plugins/print-kit \
+            $PY plugins/print-kit/scripts/session_context.py > hook.json
+          $PY -c "import json; c=json.load(open('hook.json', encoding='utf-8'))['hookSpecificOutput']['additionalContext']; line=[l for l in c.splitlines() if 'This machine' in l][0]; print(line); assert 'missing' not in line"

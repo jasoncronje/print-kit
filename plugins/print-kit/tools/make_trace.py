@@ -54,7 +54,7 @@ def photo_size(path):
 def build(project):
     project = Path(project).resolve()
     trace = project / "trace"
-    cfg = json.loads((trace / "config.json").read_text())
+    cfg = json.loads((trace / "config.json").read_text(encoding="utf-8"))
     missing = [k for k in REQUIRED if k not in cfg]
     if missing:
         sys.exit(f"{project.name}: config.json is missing {', '.join(missing)}")
@@ -65,7 +65,7 @@ def build(project):
 
     points_file = trace / "points.json"
     if points_file.exists():
-        saved = json.loads(points_file.read_text())
+        saved = json.loads(points_file.read_text(encoding="utf-8"))
         start = [[p["x"], p["y"]] for p in saved["points_px"]]
     else:
         start = cfg.get("start_points_px")
@@ -84,11 +84,11 @@ def build(project):
         "store_doc": cfg["store_doc"],
         "draft_key": cfg["draft_key"],
     }
-    html = TEMPLATE.read_text()
+    html = TEMPLATE.read_text(encoding="utf-8")
     # "</" can't appear inside the inline JSON script tag.
     html = html.replace("__CONFIG__", json.dumps(page_cfg).replace("</", "<\\/"))
     html = html.replace("__TITLE__", cfg["title"].replace("<", "&lt;"))
-    (trace / "index.html").write_text(html)
+    (trace / "index.html").write_text(html, encoding="utf-8")
     print(f"{project.name}: trace/index.html ({len(start)} dots, photo {w}x{h})")
 
 

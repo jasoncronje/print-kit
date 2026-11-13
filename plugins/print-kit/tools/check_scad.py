@@ -49,7 +49,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import kit_profile as kit  # noqa: E402
 
-OPENSCAD = shutil.which("openscad") or "openscad"
+OPENSCAD = kit.openscad()
 
 Z_TOL = 0.01                  # flat bed faces sit exactly at z = 0
 LAYER_Z = 0.1                 # half of a 0.2 mm first layer
@@ -102,7 +102,7 @@ def part_list(src):
 def readme_defines(project):
     """{"stl/x.stl": [-D values]} from the README's `openscad ... -o stl/x.stl` lines."""
     out, readme = {}, project / "README.md"
-    for line in readme.read_text().splitlines() if readme.exists() else []:
+    for line in readme.read_text(encoding="utf-8").splitlines() if readme.exists() else []:
         i = line.find("openscad ")
         if i < 0 or ".stl" not in line:
             continue
@@ -146,9 +146,9 @@ def label_of(defines):
 
 def project_jobs(project, only, fn, strict):
     cfg_path = project / "viewer" / "config.json"
-    cfg = json.loads(cfg_path.read_text()) if cfg_path.exists() else {}
+    cfg = json.loads(cfg_path.read_text(encoding="utf-8")) if cfg_path.exists() else {}
     scad = project / cfg["scad"] if cfg.get("scad") else sorted(project.glob("*.scad"))[0]
-    parts, readme = part_list(scad.read_text()), readme_defines(project)
+    parts, readme = part_list(scad.read_text(encoding="utf-8")), readme_defines(project)
     fn = fn if fn is not None else cfg.get("fn")
 
     entries = []
@@ -332,14 +332,14 @@ def check_part(job, tmp, timeout):
     cmd = [OPENSCAD, "--hardwarnings", "--summary", "all", "--summary-file", summ,
            "--export-format", "asciistl", "-o", stl] + [x for d in job["defines"] for x in ("-D", d)]
     try:
-        p = subprocess.run(cmd + [job["file"]], capture_output=True, text=True, timeout=timeout, cwd=job["dir"])
+        p = subprocess.run(cmd + [job["file"]], capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=timeout, cwd=job["dir"])
     except subprocess.TimeoutExpired:
         check("export", "FAIL", f"timed out after {timeout} s")
         return done()
     lines = [ln.strip() for ln in (p.stderr + p.stdout).splitlines() if ln.strip() and not ln.startswith("ECHO:")]
     empty = any(EMPTY_RE.search(ln) for ln in lines) or not os.path.exists(stl) or os.path.getsize(stl) < 100
     bad = [ln for ln in lines if BAD_RE.search(ln) and not EMPTY_RE.search(ln)]
-    geo = json.loads(Path(summ).read_text()).get("geometry", {}) if os.path.exists(summ) else {}
+    geo = json.loads(Path(summ).read_text(encoding="utf-8")).get("geometry", {}) if os.path.exists(summ) else {}
     box = geo.get("bounding_box", {})
 
     if job["clash"]:

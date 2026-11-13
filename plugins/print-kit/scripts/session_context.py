@@ -34,12 +34,22 @@ def profile_summary(p):
         f"- Materials: default {p['materials']['default']}, owned {', '.join(p['materials']['owned'])}",
         f"- Data folder: {p['data_dir']}; pages served with launcher '{p['server']['launcher']}'",
         "- Rules: " + ", ".join(f"{k}={v}" for k, v in rules.items()),
+        machine(),
     ]
     if p["taste"]:
         lines.append("- Taste (beats the default taste list):\n" + "\n".join(f"  - {t}" for t in p["taste"]))
     if p["notes"]:
         lines.append("- Notes:\n" + "\n".join(f"  - {t}" for t in p["notes"]))
     return "\n".join(lines)
+
+
+def machine():
+    """Which Python and OpenSCAD to run here: `python3` and `openscad` aren't always the names (Windows)."""
+    scad = kit.openscad_candidates()
+    line = f"- This machine: where commands say `python3`, run `{sys.executable}`; "
+    if scad:
+        return line + f"where they say `openscad`, run `{kit.openscad()}`"
+    return line + f"OpenSCAD is missing: offer `{sys.executable} {ROOT / 'tools' / 'doctor.py'} --install`"
 
 
 def main():
@@ -56,9 +66,10 @@ def main():
     if not p["_file"]:
         if has_scad:
             emit("print-kit is installed but has no profile here. If the user wants help with these "
-                 "OpenSCAD models, suggest /print-kit:setup (it asks about their printer and slicer).")
+                 "OpenSCAD models, suggest /print-kit:setup (it asks about their printer and slicer).\n"
+                 + machine())
         return
-    rules = (ROOT / "rules" / "house-rules.md").read_text()
+    rules = (ROOT / "rules" / "house-rules.md").read_text(encoding="utf-8")
     emit(f"{rules}\n\n## This user's profile\n\n{profile_summary(p)}\n\n"
          f"`<tools>` above is {tools} (run its scripts with python3; `doctor.py` checks and installs "
          "OpenSCAD).")

@@ -110,7 +110,7 @@ class Handler(SimpleHTTPRequestHandler):
             return self.send_json(400, {"error": "file"})
         if not path.exists():
             return self.send_json(200, {"exists": False, "data": None})
-        return self.send_json(200, {"exists": True, "data": json.loads(path.read_text())})
+        return self.send_json(200, {"exists": True, "data": json.loads(path.read_text(encoding="utf-8"))})
 
     def store_post(self):
         path = self.store_path()
@@ -126,17 +126,17 @@ class Handler(SimpleHTTPRequestHandler):
         except Exception:
             return self.send_json(400, {"error": "body"})
         if mode == "update" and path.exists():
-            data = {**json.loads(path.read_text()), **data}
+            data = {**json.loads(path.read_text(encoding="utf-8")), **data}
         path.parent.mkdir(parents=True, exist_ok=True)
         tmp = path.with_suffix(".json.tmp")
-        tmp.write_text(json.dumps(data, indent=2) + "\n")
+        tmp.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
         tmp.replace(path)
         self.send_json(200, {"saved": str(path)})
 
     def send_page(self):
         cfg = Path(self.directory) / "config.json"
-        title = json.loads(cfg.read_text()).get("title", "") if cfg.exists() else ""
-        body = TEMPLATE.read_text().replace("__TITLE__", title or Path(self.directory).parent.name).encode()
+        title = json.loads(cfg.read_text(encoding="utf-8")).get("title", "") if cfg.exists() else ""
+        body = TEMPLATE.read_text(encoding="utf-8").replace("__TITLE__", title or Path(self.directory).parent.name).encode()
         self.send_body(body, "text/html; charset=utf-8")
 
     def end_headers(self):
@@ -171,7 +171,7 @@ class Handler(SimpleHTTPRequestHandler):
         if not any("{file}" in a for a in SLICER["open_command"]):
             cmd.append(str(path))
         try:
-            r = subprocess.run(cmd, capture_output=True, text=True)
+            r = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8", errors="replace")
         except OSError as e:
             return self.send_json(500, {"error": str(e)})
         if r.returncode:

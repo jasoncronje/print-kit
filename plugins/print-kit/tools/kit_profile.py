@@ -13,12 +13,21 @@ The /print-kit:setup skill writes the file.
 """
 
 import copy
+import glob
 import json
 import os
+import platform
+import shutil
 import sys
 from pathlib import Path
 
+# Windows consoles and pipes default to a legacy code page that can't print every character.
+for _stream in (sys.stdout, sys.stderr):
+    if hasattr(_stream, "reconfigure"):
+        _stream.reconfigure(errors="replace")
+
 NAME = "print-kit.json"
+SYSTEM = platform.system()  # Darwin, Linux, Windows
 USER_FILE = Path.home() / ".config" / "print-kit" / NAME
 
 DEFAULTS = {
@@ -46,6 +55,7 @@ DEFAULTS = {
         "supports": "avoid, but use them rather than distort a shape",
         "commit_after_changes": True,
     },
+    "openscad": "",                 # path to the OpenSCAD binary; "" finds it (see openscad())
     "data_dir": "data",
     "taste": [],
     "notes": [],
@@ -82,7 +92,7 @@ def find(start=None):
 def load(start=None):
     """The merged profile, with `_file` and `_root` (the workspace folder) filled in."""
     path = find(start)
-    prof = merge(DEFAULTS, json.loads(path.read_text()) if path else {})
+    prof = merge(DEFAULTS, json.loads(path.read_text(encoding="utf-8")) if path else {})
     prof["_file"] = str(path) if path else None
     ws = find_workspace(start)
     prof["_root"] = str(ws.parent) if ws else None
@@ -98,6 +108,46 @@ def workspace(start=None):
 def bed(start=None):
     b = load(start)["printer"]["bed_mm"]
     return tuple(float(x) for x in (list(b) + [b[-1]] * 3)[:3])
+
+
+def data_home():
+    """Per-user folder for things print-kit installs (OpenSCAD when no package manager did)."""
+    if SYSTEM == "Windows":
+        return Path(os.environ.get("LOCALAPPDATA", Path.home() / "AppData" / "Local")) / "print-kit"
+    if SYSTEM == "Darwin":
+        return Path.home() / "Library" / "Application Support" / "print-kit"
+    return Path(os.environ.get("XDG_DATA_HOME", Path.home() / ".local" / "share")) / "print-kit"
+
+
+def _console(path):
+    """On Windows, openscad.exe is a GUI program that prints nothing; openscad.com is its console twin."""
+    com = Path(path).with_suffix(".com")
+    return str(com) if SYSTEM == "Windows" and com.is_file() else str(path)
+
+
+def openscad_candidates():
+    """Where OpenSCAD may be, most likely first: PATH, print-kit's own install, the usual app folders."""
+    found = [shutil.which("openscad")]
+    if SYSTEM == "Darwin":
+        for apps in (Path.home() / "Applications", Path("/Applications")):
+            found += sorted(glob.glob(str(apps / "OpenSCAD*.app" / "Contents" / "MacOS" / "OpenSCAD")))
+    elif SYSTEM == "Windows":
+        found += sorted(glob.glob(str(data_home() / "openscad" / "*" / "openscad.com")), reverse=True)
+        for env in ("ProgramFiles", "ProgramFiles(x86)"):
+            if os.environ.get(env):
+                found += sorted(glob.glob(os.path.join(os.environ[env], "OpenSCAD*", "openscad.exe")))
+    else:
+        found.append(str(data_home() / "openscad" / "openscad"))
+    return [_console(f) for f in found if f and Path(f).is_file()]
+
+
+def openscad(start=None):
+    """The OpenSCAD binary to run: the profile's `openscad` if set, else the first candidate, else "openscad"."""
+    own = load(start).get("openscad")
+    if own and Path(own).expanduser().is_file():
+        return _console(Path(own).expanduser())
+    found = openscad_candidates()
+    return found[0] if found else "openscad"
 
 
 def main():

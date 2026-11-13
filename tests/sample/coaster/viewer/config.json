@@ -1,0 +1,13 @@
+{
+  "title": "Coaster",
+  "scad": "coaster.scad",
+  "up": "z",
+  "facts": [["Size", "Ø90 × 4 mm"]],
+  "assembly": [
+    { "id": "coaster", "name": "Coaster", "color": "#4263eb", "scad": { "part": "coaster" }, "qty": 1, "material": "PLA" }
+  ],
+  "plates": [{ "id": "coaster", "name": "Coaster", "note": "0.4 nozzle. Flat on the bed, no supports." }],
+  "print": [
+    { "id": "coaster", "name": "Coaster", "plate": "coaster", "scad": { "part": "coaster" }, "qty": 1, "material": "PLA" }
+  ]
+}

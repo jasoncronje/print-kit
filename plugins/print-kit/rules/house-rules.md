@@ -17,6 +17,8 @@ materials they use, and which rules they switched off. Profile values win over a
   results (`objects/`, `fits.csv`, `prints.csv`, `hardware.json`). Read it before picking a number;
   add to it after every measurement or print.
 - `python3 <tools>/check_scad.py <project>`: checks every printable part before handoff.
+- `python3` and `openscad` in these docs mean the Python and OpenSCAD this session names under
+  "This machine" (on Windows they are usually `python` and a full path).
 
 ## Project layout
 

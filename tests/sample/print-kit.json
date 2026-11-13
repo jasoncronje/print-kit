@@ -1,0 +1,4 @@
+{
+  "printer": { "name": "CI printer", "bed_mm": [220, 220, 250], "nozzle_mm": 0.4 },
+  "materials": { "default": "PLA", "owned": ["PLA"] }
+}

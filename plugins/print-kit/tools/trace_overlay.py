@@ -23,9 +23,9 @@ def main():
     if len(sys.argv) not in (2, 3):
         sys.exit(__doc__)
     trace = Path(sys.argv[1]).resolve() / "trace"
-    cfg = json.loads((trace / "config.json").read_text())
+    cfg = json.loads((trace / "config.json").read_text(encoding="utf-8"))
     saved = trace / "points.json"
-    pts = json.loads(saved.read_text())["points_px"] if saved.exists() else cfg["start_points_px"]
+    pts = json.loads(saved.read_text(encoding="utf-8"))["points_px"] if saved.exists() else cfg["start_points_px"]
     photo = Path(cfg["photo"])
     photo = photo if photo.is_absolute() else (trace / photo if (trace / photo).exists() else trace.parent / photo)
     w, h = photo_size(photo)
@@ -44,7 +44,7 @@ def main():
            f'<polygon points="{line}" fill="none" stroke="#ffe600" stroke-width="3"/>'
            f'<g fill="#00c8ff">{dots}</g></svg>\n')
     out = Path(sys.argv[2]) if len(sys.argv) == 3 else trace / "overlay.svg"
-    out.write_text(svg)
+    out.write_text(svg, encoding="utf-8")
     print(f"wrote {out} ({len(pts)} points)")
 
 

@@ -29,14 +29,14 @@ POCKET_KEYS = ["id", "kind", "x", "y", "rot", "mode", "k", "len", "span"]
 def build(project):
     project = Path(project).resolve()
     layout = project / "layout"
-    cfg = json.loads((layout / "config.json").read_text())
+    cfg = json.loads((layout / "config.json").read_text(encoding="utf-8"))
     missing = [k for k in REQUIRED if k not in cfg]
     if missing:
         sys.exit(f"{project.name}: config.json is missing {', '.join(missing)}")
 
     saved = layout / "saved.json"
     if saved.exists():
-        start = [{k: p[k] for k in POCKET_KEYS if k in p} for p in json.loads(saved.read_text())["pockets"]]
+        start = [{k: p[k] for k in POCKET_KEYS if k in p} for p in json.loads(saved.read_text(encoding="utf-8"))["pockets"]]
     else:
         start = cfg["start_pockets"]
     for p in start:
@@ -45,11 +45,11 @@ def build(project):
 
     page_cfg = {k: cfg[k] for k in REQUIRED}
     page_cfg["start_pockets"] = start
-    html = TEMPLATE.read_text()
+    html = TEMPLATE.read_text(encoding="utf-8")
     # "</" can't appear inside the inline JSON script tag.
     html = html.replace("__CONFIG__", json.dumps(page_cfg).replace("</", "<\\/"))
     html = html.replace("__TITLE__", cfg["title"].replace("<", "&lt;"))
-    (layout / "index.html").write_text(html)
+    (layout / "index.html").write_text(html, encoding="utf-8")
     print(f"{project.name}: layout/index.html ({len(start)} pockets)")
 
 
