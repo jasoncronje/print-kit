@@ -1,0 +1,503 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>__TITLE__</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Instrument+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: the photo owns the screen. Title and save state float top-left,
+   zoom top-right, the legend on the left, measurements on the right, edit
+   tools docked at the bottom. On phones the panels stack under the stage.
+   Palette and type match the shared 3D viewer (tools/viewer/template.html):
+   brass from a textured PEI sheet on cool workshop grey. The trace itself is
+   the one loud thing: a brass line with a brass clearance glow.
+   Shared by every project (tools/make_trace.py). */
+:root {
+  --stage-hi: #f2f4f0;
+  --stage-lo: #d3d9d2;
+  --panel: rgba(250, 251, 248, 0.9);
+  --panel-solid: #f7f8f5;
+  --ink: #1c2420;
+  --muted: #627069;
+  --line: #d6dcd5;
+  --accent: #8f6a22;
+  --accent-ink: #fffaf0;
+  --accent-soft: #efe5cf;
+  --warn: #b9441f;
+  --warn-soft: #f6e2d9;
+  --ok: #3f7a4f;
+  --trace: #e8bd5c;        /* on the photo, so the same in both themes */
+  --trace-sel: #ff6f4d;
+  --metal: #b9c0bd;
+  --mat: #27302b;
+  --shadow: 0 1px 2px rgba(28, 36, 32, 0.08), 0 8px 24px -10px rgba(28, 36, 32, 0.25);
+  --font-display: "Bricolage Grotesque", "Avenir Next", "Helvetica Neue", Arial, sans-serif;
+  --font-ui: "Instrument Sans", "Helvetica Neue", Arial, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --stage-hi: #2b312e; --stage-lo: #141816; --panel: rgba(29, 34, 32, 0.9); --panel-solid: #1d2220;
+    --ink: #e7ebe6; --muted: #9aa69f; --line: #323a35; --accent: #d6b066; --accent-ink: #1f1a10;
+    --accent-soft: #3a3220; --warn: #f08d66; --warn-soft: #3c241b; --ok: #7fc28f;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 10px 28px -10px rgba(0, 0, 0, 0.6); color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --stage-hi: #2b312e; --stage-lo: #141816; --panel: rgba(29, 34, 32, 0.9); --panel-solid: #1d2220;
+  --ink: #e7ebe6; --muted: #9aa69f; --line: #323a35; --accent: #d6b066; --accent-ink: #1f1a10;
+  --accent-soft: #3a3220; --warn: #f08d66; --warn-soft: #3c241b; --ok: #7fc28f;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 10px 28px -10px rgba(0, 0, 0, 0.6); color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body { background: var(--stage-lo); color: var(--ink); font: 14px/1.4 var(--font-ui); overflow: hidden; font-variant-numeric: tabular-nums; }
+button { font: inherit; color: inherit; }
+button:focus-visible, textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.app { position: relative; height: 100%; }
+.stage { position: absolute; inset: 0; background: radial-gradient(120% 90% at 50% 35%, var(--stage-hi), var(--stage-lo)); }
+.stage svg { position: absolute; inset: 0; display: block; width: 100%; height: 100%; touch-action: none; cursor: grab; user-select: none; }
+.stage svg.panning { cursor: grabbing; }
+.pt { cursor: move; }
+
+/* floating layer */
+.layer { position: absolute; inset: 0; pointer-events: none;
+  padding: 14px max(14px, env(safe-area-inset-right, 0px)) calc(14px + env(safe-area-inset-bottom, 0px)) max(14px, env(safe-area-inset-left, 0px));
+  display: grid; grid-template-columns: 236px minmax(0, 1fr) 236px; grid-template-rows: auto minmax(0, 1fr) auto; gap: 12px; }
+.layer > * { pointer-events: auto; }
+.panel { background: var(--panel); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow); }
+
+.bar { grid-column: 1 / 3; grid-row: 1; justify-self: start; align-self: start; display: flex; align-items: center; gap: 6px 14px; flex-wrap: wrap; padding: 9px 10px 9px 16px; border-radius: 999px; }
+h1 { margin: 0; font: 800 22px/1 var(--font-display); letter-spacing: -0.02em; font-variation-settings: "opsz" 72; text-wrap: balance; }
+.state { display: inline-flex; align-items: center; gap: 8px; padding: 5px 11px 5px 9px; border-radius: 999px; background: color-mix(in srgb, var(--ink) 6%, transparent); font-size: 13px; font-weight: 600; color: var(--muted); }
+.state::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--line); }
+.state[data-s="saved"] { color: var(--ink); }
+.state[data-s="saved"]::before { background: var(--ok); }
+.state[data-s="dirty"]::before, .state[data-s="local"]::before { background: var(--accent); }
+.state[data-s="saving"]::before { background: var(--accent); animation: pulse 0.9s ease-in-out infinite alternate; }
+.state[data-s="error"] { color: var(--warn); }
+.state[data-s="error"]::before { background: var(--warn); }
+@keyframes pulse { from { opacity: 0.3; } to { opacity: 1; } }
+
+.views { grid-column: 3; grid-row: 1; justify-self: end; align-self: start; display: flex; gap: 2px; padding: 3px; border-radius: 999px; }
+.views button { border: 0; background: none; border-radius: 999px; padding: 6px 12px; font-size: 13px; font-weight: 600; color: var(--muted); cursor: pointer; min-width: 34px; }
+.views button:hover { color: var(--ink); background: var(--accent-soft); }
+
+/* legend */
+.legend { grid-column: 1; grid-row: 2; align-self: start; max-height: 100%; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+.legend h2, .info h2 { margin: 0; font: 800 17px/1.1 var(--font-display); letter-spacing: -0.01em; }
+.ex-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.ex { margin: 0; display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.ex svg { display: block; width: 100%; height: auto; border-radius: 9px; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.08); }
+.ex.good svg { box-shadow: 0 0 0 2px var(--ok); }
+.ex.bad svg { box-shadow: 0 0 0 2px var(--warn); }
+.ex figcaption { font-size: 12.5px; line-height: 1.25; color: var(--muted); }
+.ex figcaption b { display: block; color: var(--ink); font-weight: 600; font-size: 13px; }
+
+/* measurements */
+.info { grid-column: 3; grid-row: 2; align-self: start; max-height: 100%; overflow-y: auto; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; }
+.facts { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 5px 14px; margin: 0; font-size: 13px; }
+.facts dt { color: var(--muted); }
+.facts dd { margin: 0; text-align: right; font-weight: 500; }
+.facts dd.yes { color: var(--ok); }
+.facts dd.no { color: var(--warn); font-weight: 600; }
+.check { background: var(--warn-soft); border-radius: 10px; padding: 9px 11px; font-size: 13px; }
+.check b { display: block; color: var(--warn); font-weight: 600; margin-bottom: 2px; }
+.keys { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 10px; margin: 0; padding-top: 10px; border-top: 1px solid var(--line); font-size: 12.5px; color: var(--muted); }
+.keys dt { color: var(--ink); font-weight: 500; }
+.keys dd { margin: 0; }
+.ghost { border: 0; background: none; border-radius: 8px; padding: 4px 0; text-align: left; font-size: 13px; font-weight: 600; color: var(--accent); cursor: pointer; }
+textarea { width: 100%; min-height: 90px; resize: vertical; border: 1px solid var(--line); border-radius: 8px; background: var(--panel-solid); color: var(--ink); font: 12px/1.4 var(--font-ui); padding: 6px; }
+
+/* bottom dock */
+.dock { grid-column: 1 / 4; grid-row: 3; justify-self: center; display: flex; align-items: center; gap: 4px; padding: 5px; border-radius: 999px; max-width: 100%; flex-wrap: wrap; justify-content: center; }
+.dock .sep { width: 1px; align-self: stretch; margin: 4px 4px; background: var(--line); }
+.tool { border: 0; background: none; border-radius: 999px; padding: 8px 13px; font-size: 13px; font-weight: 600; color: var(--muted); cursor: pointer; white-space: nowrap; }
+.tool:hover:not(:disabled) { color: var(--ink); background: color-mix(in srgb, var(--ink) 6%, transparent); }
+.tool:disabled { opacity: 0.4; cursor: default; }
+.save { border: 0; border-radius: 999px; padding: 9px 16px; background: var(--accent); color: var(--accent-ink); font-weight: 600; font-size: 13.5px; cursor: pointer; white-space: nowrap; }
+.save:disabled { opacity: 0.5; cursor: default; }
+
+@media (max-width: 860px) {
+  body { overflow: auto; }
+  .app { height: auto; min-height: 100%; --stage-h: max(56vh, 300px); }
+  .stage { position: relative; height: var(--stage-h); }
+  .layer { position: static; display: flex; flex-direction: column; gap: 10px; pointer-events: auto; }
+  .bar { position: absolute; top: 12px; left: max(14px, env(safe-area-inset-left, 0px)); right: max(14px, env(safe-area-inset-right, 0px)); justify-self: auto; border-radius: 14px; }
+  h1 { font-size: 19px; }
+  .views { position: absolute; top: calc(var(--stage-h) - 48px); right: max(14px, env(safe-area-inset-right, 0px)); }
+  .dock { order: -1; justify-content: flex-start; border-radius: 14px; }
+  .legend, .info, .dock { max-height: none; align-self: stretch; justify-self: stretch; }
+  .ex-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+@media (max-width: 520px) { .ex-grid { grid-template-columns: 1fr 1fr; } }
+@media (prefers-reduced-motion: reduce) { .state[data-s="saving"]::before { animation: none; } }
+</style>
+
+<script src="/api/local-db.js"></script>
+<script id="config" type="application/json">__CONFIG__</script>
+
+<div class="app">
+  <div class="stage">
+    <svg id="view" aria-label="Photo with the traced outline">
+      <defs>
+        <mask id="outside" maskUnits="userSpaceOnUse">
+          <rect id="maskRect" fill="#fff"></rect>
+          <polygon id="maskPoly" fill="#000"></polygon>
+        </mask>
+      </defs>
+      <image id="photo"></image>
+      <polygon id="band" fill="none" stroke="var(--trace)" stroke-opacity="0.45" stroke-linejoin="round" mask="url(#outside)"></polygon>
+      <polygon id="outline" fill="var(--trace)" fill-opacity="0.06" stroke="var(--trace)" stroke-linejoin="round" vector-effect="non-scaling-stroke" stroke-width="2"></polygon>
+      <polyline id="hit" fill="none" stroke="transparent" stroke-linejoin="round" vector-effect="non-scaling-stroke" stroke-width="16"></polyline>
+      <g id="pts"></g>
+    </svg>
+  </div>
+
+  <div class="layer">
+    <div class="bar panel">
+      <h1 id="title"></h1>
+      <span class="state" id="state" data-s="">Loading</span>
+    </div>
+
+    <div class="views panel" role="group" aria-label="Zoom">
+      <button id="zOut" aria-label="Zoom out">−</button>
+      <button id="zIn" aria-label="Zoom in">+</button>
+      <button id="zFit">Fit</button>
+    </div>
+
+    <aside class="legend panel" aria-label="Where the line goes">
+      <h2>Where the line goes</h2>
+      <div class="ex-grid" id="legend"></div>
+    </aside>
+
+    <aside class="info panel" aria-label="Measurements">
+      <h2>Outline</h2>
+      <dl class="facts">
+        <dt>Length</dt><dd id="rLen">–</dd>
+        <dt>Height</dt><dd id="rHgt">–</dd>
+        <dt>Dots</dt><dd id="rN">–</dd>
+        <dt>Selected</dt><dd id="rSel">–</dd>
+        <dt id="fitLabel">Fits bin</dt><dd id="rFit">–</dd>
+      </dl>
+      <div class="check" id="fitCheck" hidden><b>Too big for the bin</b><span id="fitWhy"></span></div>
+      <button class="ghost" id="btnCopy">Copy points</button>
+      <textarea id="copyBox" hidden readonly aria-label="Points to copy"></textarea>
+      <dl class="keys">
+        <dt>Drag</dt><dd>move a dot or the photo</dd>
+        <dt>Double-click</dt><dd>add a dot on the line</dd>
+        <dt>Arrows</dt><dd>nudge 1 px, Shift 10 px</dd>
+        <dt>Delete</dt><dd>remove the dot</dd>
+        <dt>Scroll</dt><dd>zoom</dd>
+      </dl>
+    </aside>
+
+    <div class="dock panel" role="toolbar" aria-label="Edit">
+      <button class="tool" id="btnUndo" disabled>Undo</button>
+      <button class="tool" id="btnInsert" disabled>Add dot</button>
+      <button class="tool" id="btnDelete" disabled>Delete dot</button>
+      <button class="tool" id="btnReset">Reset</button>
+      <span class="sep"></span>
+      <button class="save" id="btnSave" disabled>Save for Claude</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  const C = JSON.parse(document.getElementById("config").textContent);
+  const MM_PER_PX = 25.4 / C.px_per_in;
+  const W = C.photo_w, H = C.photo_h;
+  const START = C.start_points_px.map(p => p.slice());
+
+  let pts = START.map(p => p.slice());
+  let sel = -1, undo = [], dirty = false, db = null;
+  let view = { x: 0, y: 0, w: W, h: H };
+
+  const $ = id => document.getElementById(id);
+  const svg = $("view"), gPts = $("pts");
+  const NS = "http://www.w3.org/2000/svg";
+
+  document.title = C.title;
+  $("title").textContent = C.title;
+  $("photo").setAttribute("href", C.photo);
+  for (const el of [$("photo"), $("maskRect")]) { el.setAttribute("width", W); el.setAttribute("height", H); }
+  for (const el of [$("photo"), $("maskRect")]) { el.setAttribute("x", 0); el.setAttribute("y", 0); }
+  $("outside").setAttribute("width", W); $("outside").setAttribute("height", H);
+
+  // Legend: a strip of metal on the mat, with the line in four places.
+  const legend = [
+    { cls: "good", y: 40, t: "On the edge", d: "where it should be" },
+    { cls: "bad", y: 58, t: "On the metal", d: "pocket too small" },
+    { cls: "bad", y: 22, t: "On the mat", d: "clearance counted twice" },
+    { cls: "", y: 40, t: "Glow", d: `${C.clearance_mm} mm clearance, added for you`, dim: true },
+  ];
+  $("legend").innerHTML = legend.map(e => `
+    <figure class="ex ${e.cls}">
+      <svg viewBox="0 0 120 80" aria-hidden="true">
+        <rect width="120" height="80" fill="var(--mat)"></rect>
+        <path d="M0 80 V40 Q60 24 120 40 V80 Z" fill="var(--metal)"></path>
+        <path d="M0 ${e.y} Q60 ${e.y - 16} 120 ${e.y}" fill="none" stroke="var(--trace)" stroke-opacity="0.45" stroke-width="12" transform="translate(0,-6)"></path>
+        <path d="M0 ${e.y} Q60 ${e.y - 16} 120 ${e.y}" fill="none" stroke="var(--trace)" stroke-width="2.5"></path>
+        ${e.dim
+          ? `<path d="M92 13 V25 M87 13 H97 M87 25 H97" stroke="#f2f4f0" stroke-width="1.5"></path>`
+          : `<circle cx="60" cy="${e.y - 8}" r="4.5" fill="var(--trace)" stroke="#111" stroke-width="1.5"></circle>`}
+      </svg>
+      <figcaption><b>${e.t}</b>${e.d}</figcaption>
+    </figure>`).join("");
+
+  const setState = (s, text) => { const el = $("state"); el.dataset.s = s; el.textContent = text; };
+  const hhmm = d => d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+
+  // Every edit is also kept in this browser, so a failed save never loses work.
+  const saveDraft = () => { try { localStorage.setItem(C.draft_key, JSON.stringify({ pts, at: Date.now() })); } catch {} };
+  const loadDraft = () => { try { return JSON.parse(localStorage.getItem(C.draft_key) || "null"); } catch { return null; } };
+
+  const pushUndo = () => { undo.push(JSON.stringify(pts)); if (undo.length > 100) undo.shift(); $("btnUndo").disabled = false; };
+  const markDirty = () => { dirty = true; saveDraft(); setState(db ? "dirty" : "local", db ? "Unsaved" : "Kept in this browser"); };
+
+  const pxPerScreen = () => {
+    const r = svg.getBoundingClientRect();
+    return Math.max(view.w / (r.width || 1), view.h / (r.height || 1));
+  };
+  const applyView = () => { svg.setAttribute("viewBox", `${view.x} ${view.y} ${view.w} ${view.h}`); render(); };
+
+  function bbox() {
+    const xs = pts.map(p => p[0]), ys = pts.map(p => p[1]);
+    return { x0: Math.min(...xs), x1: Math.max(...xs), y0: Math.min(...ys), y1: Math.max(...ys) };
+  }
+  function toMm() {
+    const b = bbox(), cx = (b.x0 + b.x1) / 2, cy = (b.y0 + b.y1) / 2;
+    return pts.map(([x, y]) => [+((x - cx) * MM_PER_PX).toFixed(1), +((cy - y) * MM_PER_PX).toFixed(1)]);
+  }
+
+  function render() {
+    const s = pts.map(p => p.join(",")).join(" ");
+    $("outline").setAttribute("points", s);
+    $("hit").setAttribute("points", s + " " + pts[0].join(","));
+    $("band").setAttribute("points", s);
+    $("maskPoly").setAttribute("points", s);
+    // The stroke is centred on the line; the mask hides the inner half, leaving the clearance gap.
+    $("band").setAttribute("stroke-width", (2 * C.clearance_mm / MM_PER_PX).toFixed(2));
+
+    const k = pxPerScreen(), r = 6.5 * k;
+    gPts.replaceChildren();
+    pts.forEach((p, i) => {
+      const c = document.createElementNS(NS, "circle");
+      c.setAttribute("cx", p[0]); c.setAttribute("cy", p[1]); c.setAttribute("r", i === sel ? r * 1.3 : r);
+      c.setAttribute("fill", i === sel ? "var(--trace-sel)" : "var(--trace)");
+      c.setAttribute("stroke", "#111"); c.setAttribute("stroke-width", 1.5 * k);
+      c.setAttribute("class", "pt"); c.dataset.i = i;
+      gPts.appendChild(c);
+    });
+
+    const b = bbox();
+    const len = (b.x1 - b.x0) * MM_PER_PX, hgt = (b.y1 - b.y0) * MM_PER_PX;
+    $("rLen").textContent = `${len.toFixed(1)} mm`;
+    $("rHgt").textContent = `${hgt.toFixed(1)} mm`;
+    $("rN").textContent = pts.length;
+    $("rSel").textContent = sel < 0 ? "none" : `#${sel + 1}`;
+
+    if (C.fit) {
+      // Rotated bounding box (plus clearance) against the bin, as the .scad places it.
+      const a = C.fit.angle * Math.PI / 180, mm = toMm();
+      const rx = mm.map(([x, y]) => x * Math.cos(a) - y * Math.sin(a));
+      const ry = mm.map(([x, y]) => x * Math.sin(a) + y * Math.cos(a));
+      const fx = Math.max(...rx) - Math.min(...rx) + 2 * C.clearance_mm;
+      const fy = Math.max(...ry) - Math.min(...ry) + 2 * C.clearance_mm;
+      const mx = C.fit.bin_x - 2 * C.fit.margin, my = C.fit.bin_y - 2 * C.fit.margin;
+      const fits = fx <= mx && fy <= my;
+      $("fitLabel").textContent = `Fits ${C.fit.label}`;
+      $("rFit").textContent = fits ? "yes" : "no";
+      $("rFit").className = fits ? "yes" : "no";
+      $("fitCheck").hidden = fits;
+      $("fitWhy").textContent = `${fx.toFixed(1)} × ${fy.toFixed(1)} mm needs ≤ ${mx.toFixed(1)} × ${my.toFixed(1)}`;
+    } else {
+      $("fitLabel").hidden = $("rFit").hidden = true;
+    }
+    $("btnInsert").disabled = sel < 0;
+    $("btnDelete").disabled = sel < 0 || pts.length <= 3;
+  }
+
+  function toSvg(evt) {
+    const pt = svg.createSVGPoint(); pt.x = evt.clientX; pt.y = evt.clientY;
+    return pt.matrixTransform(svg.getScreenCTM().inverse());
+  }
+
+  // Dragging dots and panning the photo.
+  let drag = null;
+  svg.addEventListener("pointerdown", e => {
+    const t = e.target;
+    svg.setPointerCapture(e.pointerId);
+    if (t.classList && t.classList.contains("pt")) {
+      sel = +t.dataset.i; pushUndo();
+      const p = toSvg(e);
+      drag = { kind: "pt", dx: pts[sel][0] - p.x, dy: pts[sel][1] - p.y, moved: false };
+      render();
+    } else {
+      drag = { kind: "pan", sx: e.clientX, sy: e.clientY, vx: view.x, vy: view.y };
+      svg.classList.add("panning");
+    }
+  });
+  svg.addEventListener("pointermove", e => {
+    if (!drag) return;
+    if (drag.kind === "pt") {
+      const p = toSvg(e);
+      pts[sel] = [Math.round(p.x + drag.dx), Math.round(p.y + drag.dy)];
+      drag.moved = true; render();
+    } else {
+      const k = pxPerScreen();
+      view.x = drag.vx - (e.clientX - drag.sx) * k;
+      view.y = drag.vy - (e.clientY - drag.sy) * k;
+      applyView();
+    }
+  });
+  const endDrag = () => {
+    if (drag && drag.kind === "pt") {
+      if (drag.moved) markDirty();
+      else { undo.pop(); $("btnUndo").disabled = !undo.length; }
+    }
+    drag = null; svg.classList.remove("panning");
+  };
+  svg.addEventListener("pointerup", endDrag);
+  svg.addEventListener("pointercancel", endDrag);
+
+  // Double-click near the outline inserts a dot on the nearest edge.
+  svg.addEventListener("dblclick", e => {
+    if (e.target.classList && e.target.classList.contains("pt")) return;
+    const p = toSvg(e);
+    let best = { d: Infinity, i: 0, q: null };
+    pts.forEach((a, i) => {
+      const b = pts[(i + 1) % pts.length];
+      const vx = b[0] - a[0], vy = b[1] - a[1];
+      const t = Math.max(0, Math.min(1, ((p.x - a[0]) * vx + (p.y - a[1]) * vy) / (vx * vx + vy * vy || 1)));
+      const qx = a[0] + t * vx, qy = a[1] + t * vy, d = Math.hypot(p.x - qx, p.y - qy);
+      if (d < best.d) best = { d, i, q: [Math.round(qx), Math.round(qy)] };
+    });
+    if (best.d > 20 * pxPerScreen()) return;
+    pushUndo(); pts.splice(best.i + 1, 0, best.q); sel = best.i + 1; markDirty(); render();
+  });
+
+  svg.addEventListener("wheel", e => { e.preventDefault(); zoomAt(toSvg(e), e.deltaY > 0 ? 1.15 : 1 / 1.15); }, { passive: false });
+
+  function zoomAt(c, f) {
+    const w = Math.min(W * 1.5, Math.max(60, view.w * f)), k = w / view.w, h = view.h * k;
+    view = { x: c.x - (c.x - view.x) * k, y: c.y - (c.y - view.y) * k, w, h };
+    applyView();
+  }
+  const center = () => ({ x: view.x + view.w / 2, y: view.y + view.h / 2 });
+  $("zIn").onclick = () => zoomAt(center(), 1 / 1.4);
+  $("zOut").onclick = () => zoomAt(center(), 1.4);
+  $("zFit").onclick = () => { fitView(); applyView(); };
+
+  function fitView() {
+    // Frame the outline in the clear middle of the stage, between the floating panels.
+    const r = svg.getBoundingClientRect();
+    const ar = (r.width || 3) / (r.height || 1);
+    const wide = r.width > 860;
+    const b = bbox();
+    let w = (b.x1 - b.x0) * (wide ? 1.65 : 1.2), h = (b.y1 - b.y0) * (wide ? 2.2 : 1.8);
+    if (w / h < ar) w = h * ar; else h = w / ar;
+    view = { x: (b.x0 + b.x1) / 2 - w / 2, y: (b.y0 + b.y1) / 2 - h / 2, w, h };
+  }
+
+  document.addEventListener("keydown", e => {
+    if (e.target.tagName === "TEXTAREA") return;
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "z") { e.preventDefault(); doUndo(); return; }
+    if (sel < 0) return;
+    const step = e.shiftKey ? 10 : 1;
+    const moves = { ArrowLeft: [-step, 0], ArrowRight: [step, 0], ArrowUp: [0, -step], ArrowDown: [0, step] };
+    if (moves[e.key]) {
+      e.preventDefault(); pushUndo();
+      pts[sel] = [pts[sel][0] + moves[e.key][0], pts[sel][1] + moves[e.key][1]];
+      markDirty(); render();
+    } else if (e.key === "Delete" || e.key === "Backspace") {
+      e.preventDefault(); deleteSel();
+    } else if (e.key === "Escape") { sel = -1; render(); }
+  });
+
+  function doUndo() {
+    if (!undo.length) return;
+    pts = JSON.parse(undo.pop()); if (sel >= pts.length) sel = -1;
+    $("btnUndo").disabled = !undo.length; markDirty(); render();
+  }
+  function deleteSel() {
+    if (sel < 0 || pts.length <= 3) return;
+    pushUndo(); pts.splice(sel, 1); sel = Math.min(sel, pts.length - 1); markDirty(); render();
+  }
+  $("btnUndo").onclick = doUndo;
+  $("btnDelete").onclick = deleteSel;
+  $("btnInsert").onclick = () => {
+    if (sel < 0) return;
+    const a = pts[sel], b = pts[(sel + 1) % pts.length];
+    pushUndo(); pts.splice(sel + 1, 0, [Math.round((a[0] + b[0]) / 2), Math.round((a[1] + b[1]) / 2)]);
+    sel += 1; markDirty(); render();
+  };
+  $("btnReset").onclick = () => { pushUndo(); pts = START.map(p => p.slice()); sel = -1; markDirty(); render(); };
+
+  $("btnCopy").onclick = async () => {
+    const text = JSON.stringify({ points_px: pts, points_mm: toMm() });
+    try { await navigator.clipboard.writeText(text); $("btnCopy").textContent = "Copied"; setTimeout(() => $("btnCopy").textContent = "Copy points", 1600); }
+    catch { const box = $("copyBox"); box.hidden = false; box.value = text; box.focus(); box.select(); }
+  };
+
+  // The store can apply a write before its promise settles, so after a few
+  // seconds read the doc back and confirm from what is actually stored.
+  $("btnSave").onclick = async () => {
+    if (!db) return;
+    const ref = db.doc(C.store_doc);
+    const savedAt = new Date().toISOString();
+    $("btnSave").disabled = true; setState("saving", "Saving");
+    const write = ref.set({
+      points_px: pts.map(p => ({ x: p[0], y: p[1] })),
+      points_mm: toMm().map(p => ({ x: p[0], y: p[1] })),
+      px_per_inch: C.px_per_in,
+      saved_at: savedAt,
+    }).then(() => "ok", err => err);
+    let result = await Promise.race([write, new Promise(r => setTimeout(() => r("slow"), 4000))]);
+    if (result === "slow") {
+      try { const snap = await ref.get(); result = snap.exists && snap.data().saved_at === savedAt ? "ok" : await write; }
+      catch { result = await write; }
+    }
+    $("btnSave").disabled = false;
+    if (result === "ok") { dirty = false; setState("saved", "Saved " + hhmm(new Date())); }
+    else setState("error", "Save failed: " + (result && result.code || "error") + ". Edits kept here");
+  };
+
+  window.addEventListener("resize", () => render());
+
+  fitView(); applyView();
+  setState("", "Start trace");
+
+  (async () => {
+    // claude.ai artifact store, else the local helper (tools/viewer_server.py) saving to trace/points.json
+    db = window.claude ? await window.claude.use("db")
+       : window.localDb ? await window.localDb({ [C.store_doc]: "points.json" }) : null;
+    if (!db) {
+      setState("local", "Saving unavailable. Copy points instead");
+      const draft = loadDraft();
+      if (draft && Array.isArray(draft.pts) && draft.pts.length >= 3 && !dirty) { pts = draft.pts; render(); }
+      return;
+    }
+    $("btnSave").disabled = false;
+    try {
+      const snap = await db.doc(C.store_doc).get();
+      const d = snap.exists ? snap.data() : null;
+      const draft = loadDraft();
+      const savedMs = d ? Date.parse(d.saved_at) : 0;
+      if (dirty) return;
+      if (draft && draft.at > savedMs + 1000 && Array.isArray(draft.pts) && draft.pts.length >= 3) {
+        pts = draft.pts; sel = -1; dirty = true; render();
+        setState("dirty", "Unsaved edits restored");
+      } else if (d && Array.isArray(d.points_px) && d.points_px.length >= 3) {
+        pts = d.points_px.map(p => [p.x, p.y]); sel = -1; render();
+        setState("saved", "Saved " + hhmm(new Date(savedMs)));
+      } else {
+        setState("", "Nothing saved yet");
+      }
+    } catch { /* keep the start trace */ }
+  })();
+})();
+</script>

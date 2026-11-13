@@ -1,0 +1,14 @@
+{
+  "name": "print-kit",
+  "owner": {
+    "name": "Jason Cronje"
+  },
+  "description": "OpenSCAD design kit for home 3D printing: rules, printer profile, checks and a 3D viewer.",
+  "plugins": [
+    {
+      "name": "print-kit",
+      "source": "./plugins/print-kit",
+      "description": "Design parametric OpenSCAD parts for your own 3D printer, with fit testing, model checks and a 3D viewer."
+    }
+  ]
+}

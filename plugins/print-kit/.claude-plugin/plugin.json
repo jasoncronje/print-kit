@@ -1,0 +1,9 @@
+{
+  "name": "print-kit",
+  "displayName": "Print Kit",
+  "version": "0.1.0",
+  "description": "Design parametric OpenSCAD parts for your own 3D printer: house rules, a printer profile, fit-test workflow, model checks, Gridfinity bins, photo-trace and layout editors, and an interactive 3D viewer with print plates.",
+  "author": { "name": "Jason Cronje" },
+  "license": "MIT",
+  "keywords": ["openscad", "3d-printing", "gridfinity", "cad", "viewer", "bambu"]
+}

@@ -1,0 +1,499 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>__TITLE__</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Instrument+Sans:wght@400;500;600&display=swap">
+<style>
+/* Pocket layout editor for Gridfinity bins made of simple shapes (round
+   holes, rectangular wells). Top view of the bin owns the screen; totals on
+   the left, the selected pocket on the right, tools docked at the bottom.
+   Palette and type match the 3D viewer and the trace editor.
+   Shared by every project (tools/make_layout.py). */
+:root {
+  --stage-hi: #f2f4f0;
+  --stage-lo: #d3d9d2;
+  --panel: rgba(250, 251, 248, 0.9);
+  --panel-solid: #f7f8f5;
+  --ink: #1c2420;
+  --muted: #627069;
+  --line: #d6dcd5;
+  --accent: #8f6a22;
+  --accent-ink: #fffaf0;
+  --accent-soft: #efe5cf;
+  --warn: #b9441f;
+  --warn-soft: #f6e2d9;
+  --ok: #3f7a4f;
+  --bin: #e9ece6;
+  --bin-edge: #9aa59f;
+  --grid: #c5ccc5;
+  --k1: #6f8fb8; --k2: #b07a4f; --k3: #5f9a86; --k4: #9a78b0; --k5: #b8a054; --k6: #c07a8a;
+  --shadow: 0 1px 2px rgba(28, 36, 32, 0.08), 0 8px 24px -10px rgba(28, 36, 32, 0.25);
+  --font-display: "Bricolage Grotesque", "Avenir Next", "Helvetica Neue", Arial, sans-serif;
+  --font-ui: "Instrument Sans", "Helvetica Neue", Arial, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --stage-hi: #2b312e; --stage-lo: #141816; --panel: rgba(29, 34, 32, 0.9); --panel-solid: #1d2220;
+    --ink: #e7ebe6; --muted: #9aa69f; --line: #323a35; --accent: #d6b066; --accent-ink: #1f1a10;
+    --accent-soft: #3a3220; --warn: #f08d66; --warn-soft: #3c241b; --ok: #7fc28f;
+    --bin: #262c29; --bin-edge: #5d6862; --grid: #3a423e;
+    --k1: #8fb0dc; --k2: #d49a6c; --k3: #7fbfa8; --k4: #bb9ad2; --k5: #d8c070; --k6: #e09aaa;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 10px 28px -10px rgba(0, 0, 0, 0.6); color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --stage-hi: #2b312e; --stage-lo: #141816; --panel: rgba(29, 34, 32, 0.9); --panel-solid: #1d2220;
+  --ink: #e7ebe6; --muted: #9aa69f; --line: #323a35; --accent: #d6b066; --accent-ink: #1f1a10;
+  --accent-soft: #3a3220; --warn: #f08d66; --warn-soft: #3c241b; --ok: #7fc28f;
+  --bin: #262c29; --bin-edge: #5d6862; --grid: #3a423e;
+  --k1: #8fb0dc; --k2: #d49a6c; --k3: #7fbfa8; --k4: #bb9ad2; --k5: #d8c070; --k6: #e09aaa;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 10px 28px -10px rgba(0, 0, 0, 0.6); color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body { margin: 0; background: var(--stage-lo); color: var(--ink); font: 14px/1.4 var(--font-ui); overflow: hidden; font-variant-numeric: tabular-nums; }
+button, input { font: inherit; color: inherit; }
+button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.app { position: relative; height: 100%; }
+.stage { position: absolute; inset: 0; background: radial-gradient(120% 90% at 50% 35%, var(--stage-hi), var(--stage-lo)); }
+.stage svg { position: absolute; inset: 64px 274px 64px 262px; width: calc(100% - 536px) !important; height: calc(100% - 128px) !important; display: block; width: 100%; height: 100%; touch-action: none; user-select: none; }
+.pk { cursor: grab; }
+.pk.drag { cursor: grabbing; }
+.pk text { pointer-events: none; fill: var(--ink); font-family: var(--font-ui); font-weight: 600; }
+.pk text.sub { fill: var(--muted); font-weight: 500; }
+
+.layer { position: absolute; inset: 0; pointer-events: none;
+  padding: 14px max(14px, env(safe-area-inset-right, 0px)) calc(14px + env(safe-area-inset-bottom, 0px)) max(14px, env(safe-area-inset-left, 0px));
+  display: grid; grid-template-columns: 236px minmax(0, 1fr) 248px; grid-template-rows: auto minmax(0, 1fr) auto; gap: 12px; }
+.layer > * { pointer-events: auto; }
+.panel { background: var(--panel); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow); }
+
+.bar { grid-column: 1 / 4; grid-row: 1; justify-self: start; align-self: start; display: flex; align-items: center; gap: 6px 14px; flex-wrap: wrap; padding: 9px 10px 9px 16px; border-radius: 999px; }
+h1 { margin: 0; font: 800 22px/1 var(--font-display); letter-spacing: -0.02em; font-variation-settings: "opsz" 72; text-wrap: balance; }
+.state { display: inline-flex; align-items: center; gap: 8px; padding: 5px 11px 5px 9px; border-radius: 999px; background: color-mix(in srgb, var(--ink) 6%, transparent); font-size: 13px; font-weight: 600; color: var(--muted); }
+.state::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--line); }
+.state[data-s="saved"] { color: var(--ink); }
+.state[data-s="saved"]::before { background: var(--ok); }
+.state[data-s="dirty"]::before, .state[data-s="local"]::before { background: var(--accent); }
+.state[data-s="saving"]::before { background: var(--accent); animation: pulse 0.9s ease-in-out infinite alternate; }
+.state[data-s="error"] { color: var(--warn); }
+.state[data-s="error"]::before { background: var(--warn); }
+@keyframes pulse { from { opacity: 0.3; } to { opacity: 1; } }
+
+.side { align-self: start; max-height: 100%; overflow-y: auto; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; }
+.totals { grid-column: 1; grid-row: 2; }
+.info { grid-column: 3; grid-row: 2; }
+h2 { margin: 0; font: 800 17px/1.1 var(--font-display); letter-spacing: -0.01em; }
+.facts { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 5px 14px; margin: 0; font-size: 13px; }
+.facts dt { color: var(--muted); display: flex; align-items: center; gap: 7px; }
+.facts dd { margin: 0; text-align: right; font-weight: 500; }
+.facts dd.no { color: var(--warn); font-weight: 600; }
+.facts dd.yes { color: var(--ok); }
+.facts .big { font: 800 17px/1 var(--font-display); }
+.sw { width: 10px; height: 10px; border-radius: 3px; flex: none; }
+.rule { border-top: 1px solid var(--line); padding-top: 10px; }
+.check { background: var(--warn-soft); border-radius: 10px; padding: 9px 11px; font-size: 13px; }
+.check b { display: block; color: var(--warn); font-weight: 600; margin-bottom: 2px; }
+.okline { color: var(--ok); font-size: 13px; font-weight: 600; }
+.muted { color: var(--muted); font-size: 13px; }
+
+.seg { display: flex; gap: 2px; padding: 3px; border-radius: 999px; background: color-mix(in srgb, var(--ink) 6%, transparent); }
+.seg button { flex: 1; border: 0; background: none; border-radius: 999px; padding: 6px 10px; font-size: 13px; font-weight: 600; color: var(--muted); cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--panel-solid); color: var(--ink); box-shadow: var(--shadow); }
+.step { display: flex; align-items: center; gap: 6px; }
+.step label { flex: 1; font-size: 13px; color: var(--muted); }
+.step button { width: 30px; height: 30px; border: 1px solid var(--line); border-radius: 50%; background: var(--panel-solid); cursor: pointer; font-weight: 600; }
+.step input { width: 52px; height: 30px; text-align: center; border: 1px solid var(--line); border-radius: 8px; background: var(--panel-solid); }
+.keys { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 10px; margin: 0; padding-top: 10px; border-top: 1px solid var(--line); font-size: 12.5px; color: var(--muted); }
+.keys dt { color: var(--ink); font-weight: 500; }
+.keys dd { margin: 0; }
+
+.dock { grid-column: 1 / 4; grid-row: 3; justify-self: center; display: flex; align-items: center; gap: 4px; padding: 5px; border-radius: 999px; max-width: 100%; flex-wrap: wrap; justify-content: center; }
+.dock .sep { width: 1px; align-self: stretch; margin: 4px 4px; background: var(--line); }
+.tool { border: 0; background: none; border-radius: 999px; padding: 8px 13px; font-size: 13px; font-weight: 600; color: var(--muted); cursor: pointer; white-space: nowrap; }
+.tool:hover:not(:disabled) { color: var(--ink); background: color-mix(in srgb, var(--ink) 6%, transparent); }
+.tool:disabled { opacity: 0.4; cursor: default; }
+.save { border: 0; border-radius: 999px; padding: 9px 16px; background: var(--accent); color: var(--accent-ink); font-weight: 600; font-size: 13.5px; cursor: pointer; white-space: nowrap; }
+.save:disabled { opacity: 0.5; cursor: default; }
+
+@media (max-width: 860px) {
+  body { overflow: auto; }
+  .app { height: auto; min-height: 100%; --stage-h: max(52vh, 280px); }
+  .stage { position: relative; height: var(--stage-h); }
+  .stage svg { inset: 64px 8px 8px 8px; width: calc(100% - 16px) !important; height: calc(100% - 72px) !important; }
+  .layer { position: static; display: flex; flex-direction: column; gap: 10px; pointer-events: auto; }
+  .bar { position: absolute; top: 12px; left: max(14px, env(safe-area-inset-left, 0px)); right: max(14px, env(safe-area-inset-right, 0px)); justify-self: auto; border-radius: 14px; }
+  h1 { font-size: 19px; }
+  .dock { order: -1; justify-content: flex-start; border-radius: 14px; }
+  .info { order: -1; }
+  .side, .dock { max-height: none; align-self: stretch; justify-self: stretch; }
+}
+@media (prefers-reduced-motion: reduce) { .state[data-s="saving"]::before { animation: none; } }
+</style>
+
+<script src="/api/local-db.js"></script>
+<script id="config" type="application/json">__CONFIG__</script>
+
+<div class="app">
+  <div class="stage">
+    <svg id="view" aria-label="Top view of the bin with its pockets">
+      <g id="binG"></g>
+      <g id="pks"></g>
+    </svg>
+  </div>
+
+  <div class="layer">
+    <div class="bar panel">
+      <h1 id="title"></h1>
+      <span class="state" id="state" data-s="">Loading</span>
+    </div>
+
+    <aside class="totals side panel" aria-label="What fits">
+      <h2>What fits</h2>
+      <dl class="facts" id="totals"></dl>
+      <dl class="facts rule" id="binFacts"></dl>
+      <div id="problems"></div>
+    </aside>
+
+    <aside class="info side panel" aria-label="Selected pocket">
+      <h2 id="selName">Pick a pocket</h2>
+      <div id="selBody"><p class="muted" style="margin:0">Click one to change it.</p></div>
+      <dl class="keys">
+        <dt>Drag</dt><dd>move a pocket (0.5 mm snap)</dd>
+        <dt>Arrows</dt><dd>nudge 0.5 mm, Shift 5 mm</dd>
+        <dt>R</dt><dd>rotate 90°</dd>
+        <dt>D</dt><dd>duplicate</dd>
+        <dt>Delete</dt><dd>remove</dd>
+      </dl>
+    </aside>
+
+    <div class="dock panel" role="toolbar" aria-label="Edit">
+      <button class="tool" id="btnUndo" disabled>Undo</button>
+      <button class="tool" id="btnRot" disabled>Rotate</button>
+      <button class="tool" id="btnDup" disabled>Duplicate</button>
+      <button class="tool" id="btnDel" disabled>Delete</button>
+      <button class="tool" id="btnReset">Reset</button>
+      <span class="sep"></span>
+      <button class="save" id="btnSave" disabled>Save for Claude</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  const C = JSON.parse(document.getElementById("config").textContent);
+  const B = C.bin, K = C.kinds, CL = C.clearance_mm;
+  // Items may rise above the rim up to top_limit (the case lid). Each pocket
+  // gets its own raised floor so it holds at least `hold` of its items' height.
+  const DEPTH = B.top_limit - B.floor_z;              // tallest stack that fits
+  const RIM = B.rim_h, HOLD = B.hold || 0.5;
+  const IX = B.outer_x / 2 - B.wall, IY = B.outer_y / 2 - B.wall;
+  const START = JSON.stringify(C.start_pockets);
+  const NS = "http://www.w3.org/2000/svg";
+  const $ = id => document.getElementById(id);
+  const svg = $("view");
+  const r1 = v => Math.round(v * 10) / 10;
+  const snap = v => Math.round(v * 2) / 2;
+
+  let pockets = JSON.parse(START);
+  let sel = null, undo = [], dirty = false, db = null;
+
+  document.title = C.title;
+  $("title").textContent = C.title;
+
+  // ---- geometry --------------------------------------------------------
+  // A pocket may be stretched past its natural size so edges line up:
+  // p.len overrides the length, p.span the width (and sets the count).
+  const along = (k, p) => (p && p.len) || k.pocket_l || k.l + 2 * CL;
+  const unit = p => p.mode === "flat" ? K[p.kind].w : K[p.kind].t;
+  const count = p => p.span ? Math.max(1, Math.floor((p.span - 2 * CL) / unit(p) + 1e-6)) : p.k;
+  function foot(p) {
+    const k = K[p.kind];
+    if (k.shape === "circle") return { c: true, r: k.d / 2 + CL };
+    const a = along(k, p), x = p.span || count(p) * unit(p) + 2 * CL;
+    return p.rot ? { hw: x / 2, hh: a / 2 } : { hw: a / 2, hh: x / 2 };
+  }
+  function cap(p) {
+    const k = K[p.kind];
+    if (k.shape === "circle") return k.h <= DEPTH ? 1 : 0;
+    if (p.mode === "flat") return count(p) * Math.floor(DEPTH / k.t + 1e-6);
+    return count(p) * Math.floor(DEPTH / k.w + 1e-6);
+  }
+  function fill(p) {          // how high the items reach above the floor
+    const k = K[p.kind];
+    if (k.shape === "circle") return k.h;
+    if (p.mode === "flat") return Math.floor(DEPTH / k.t + 1e-6) * k.t;
+    return Math.floor(DEPTH / k.w + 1e-6) * k.w;
+  }
+  function pdepth(p) {        // pocket depth below the rim
+    const h = fill(p);
+    return Math.min(RIM - B.floor_z, Math.max(h * HOLD, h - (B.top_limit - RIM)));
+  }
+  function gap(a, b) {
+    const fa = foot(a), fb = foot(b), dx = Math.abs(a.x - b.x), dy = Math.abs(a.y - b.y);
+    if (fa.c && fb.c) return Math.hypot(dx, dy) - fa.r - fb.r;
+    if (fa.c || fb.c) {
+      const c = fa.c ? fa : fb, r = fa.c ? fb : fa;
+      const ex = dx - r.hw, ey = dy - r.hh;
+      return (ex < 0 && ey < 0 ? Math.max(ex, ey) : Math.hypot(Math.max(ex, 0), Math.max(ey, 0))) - c.r;
+    }
+    const gx = dx - fa.hw - fb.hw, gy = dy - fa.hh - fb.hh;
+    return gx < 0 && gy < 0 ? Math.max(gx, gy) : Math.hypot(Math.max(gx, 0), Math.max(gy, 0));
+  }
+  function edgeRoom(p) {
+    const f = foot(p), hw = f.c ? f.r : f.hw, hh = f.c ? f.r : f.hh;
+    return Math.min(IX - Math.abs(p.x) - hw, IY - Math.abs(p.y) - hh);
+  }
+  function problems() {
+    const out = [];
+    pockets.forEach(p => { const e = edgeRoom(p); if (e < -1e-6) out.push({ ids: [p.id], t: `${label(p)} pokes ${r1(-e)} mm into the wall` }); });
+    pockets.forEach(p => { if (K[p.kind].shape === "circle" && !cap(p)) out.push({ ids: [p.id], t: `${label(p)} is taller than the bin` }); });
+    for (let i = 0; i < pockets.length; i++) for (let j = i + 1; j < pockets.length; j++) {
+      const g = gap(pockets[i], pockets[j]);
+      if (g < B.min_divider - 1e-6) out.push({ ids: [pockets[i].id, pockets[j].id],
+        t: g < 0 ? `${label(pockets[i])} overlaps ${label(pockets[j])}` : `${label(pockets[i])} and ${label(pockets[j])}: wall ${r1(g)} mm` });
+    }
+    return out;
+  }
+  const label = p => K[p.kind].name;
+
+  // ---- drawing ---------------------------------------------------------
+  const el = (tag, attrs, parent) => { const e = document.createElementNS(NS, tag); for (const a in attrs) e.setAttribute(a, attrs[a]); if (parent) parent.appendChild(e); return e; };
+  function drawBin() {
+    const g = $("binG"); g.innerHTML = "";
+    const m = 10;
+    svg.setAttribute("viewBox", `${-B.outer_x / 2 - m} ${-B.outer_y / 2 - m} ${B.outer_x + 2 * m} ${B.outer_y + 2 * m}`);
+    el("rect", { x: -B.outer_x / 2, y: -B.outer_y / 2, width: B.outer_x, height: B.outer_y, rx: B.corner_r, fill: "var(--bin)", stroke: "var(--bin-edge)", "stroke-width": 0.8 }, g);
+    el("rect", { x: -IX, y: -IY, width: 2 * IX, height: 2 * IY, rx: Math.max(B.corner_r - B.wall, 0.5), fill: "none", stroke: "var(--bin-edge)", "stroke-width": 0.3, "stroke-dasharray": "1.5 1.5" }, g);
+    for (let i = 1; i < B.units_x; i++) { const x = -B.units_x * B.pitch / 2 + i * B.pitch; el("line", { x1: x, x2: x, y1: -IY, y2: IY, stroke: "var(--grid)", "stroke-width": 0.4 }, g); }
+    for (let i = 1; i < B.units_y; i++) { const y = -B.units_y * B.pitch / 2 + i * B.pitch; el("line", { y1: y, y2: y, x1: -IX, x2: IX, stroke: "var(--grid)", "stroke-width": 0.4 }, g); }
+  }
+  function render() {
+    const bad = new Set(problems().flatMap(x => x.ids));
+    const g = $("pks"); g.innerHTML = "";
+    for (const p of pockets) {
+      const k = K[p.kind], f = foot(p), col = `var(--k${k.tone || 1})`, isSel = p.id === sel, isBad = bad.has(p.id);
+      const pg = el("g", { class: "pk", "data-id": p.id, transform: `translate(${p.x} ${-p.y})` }, g);
+      const stroke = isBad ? "var(--warn)" : isSel ? "var(--accent)" : col;
+      const sw = isSel || isBad ? 1.2 : 0.6;
+      if (f.c) el("circle", { r: f.r, fill: col, "fill-opacity": 0.28, stroke, "stroke-width": sw }, pg);
+      else {
+        el("rect", { x: -f.hw, y: -f.hh, width: 2 * f.hw, height: 2 * f.hh, rx: 1.5, fill: col, "fill-opacity": 0.28, stroke, "stroke-width": sw }, pg);
+        // Guide lines: stack boundaries (flat) or every pack (on edge, when they're far enough apart).
+        const step = p.mode === "flat" ? k.w : k.t;
+        if (count(p) > 1 && step >= 2) for (let i = 1; i < count(p); i++) {
+          const o = -(count(p) * step) / 2 + i * step;
+          el("line", p.rot ? { x1: o, x2: o, y1: -f.hh + 1, y2: f.hh - 1 } : { y1: o, y2: o, x1: -f.hw + 1, x2: f.hw - 1 },
+            pg).setAttribute("style", "stroke:" + col + ";stroke-width:0.35;stroke-dasharray:1.2 1.2");
+        }
+      }
+      const w = f.c ? 2 * f.r : 2 * f.hw, h = f.c ? 2 * f.r : 2 * f.hh;
+      const fs = Math.max(2.4, Math.min(5, w / 7, h / 3.2));
+      if (f.c) {
+        const t = el("text", { "text-anchor": "middle", y: fs * 0.35, "font-size": fs * 0.9 }, pg); t.textContent = k.name.split(" ")[0];
+      } else {
+        const t = el("text", { "text-anchor": "middle", y: -fs * 0.15, "font-size": fs }, pg); t.textContent = k.name;
+        const s = el("text", { "text-anchor": "middle", y: fs * 1.05, "font-size": fs * 0.82, class: "sub" }, pg);
+        s.textContent = `${cap(p)} · ${p.mode === "flat" ? "flat" : "on edge"}`;
+        if (h < 12) { t.setAttribute("y", fs * 0.35); s.remove(); }
+      }
+    }
+    renderTotals(bad); renderSel();
+    ["btnRot", "btnDup", "btnDel"].forEach(id => $(id).disabled = !sel);
+    $("btnRot").disabled = !sel || K[byId(sel).kind].shape === "circle";
+    $("btnUndo").disabled = !undo.length;
+  }
+  const byId = id => pockets.find(p => p.id === id);
+
+  function renderTotals(bad) {
+    const tot = {};
+    for (const p of pockets) tot[p.kind] = (tot[p.kind] || 0) + cap(p);
+    $("totals").innerHTML = Object.keys(K).map(id =>
+      `<dt><span class="sw" style="background:var(--k${K[id].tone || 1})"></span>${K[id].name}</dt><dd class="big">${tot[id] || 0}</dd>`).join("");
+    const used = pockets.reduce((s, p) => { const f = foot(p); return s + (f.c ? Math.PI * f.r * f.r : 4 * f.hw * f.hh); }, 0);
+    $("binFacts").innerHTML = `
+      <dt>Bin</dt><dd>${B.label} · ${B.outer_x} × ${B.outer_y}</dd>
+      <dt>Rim</dt><dd>${RIM} mm</dd>
+      <dt>Items up to</dt><dd>${B.top_limit} mm</dd>
+      <dt>Floor used</dt><dd>${Math.round(100 * used / (4 * IX * IY))}%</dd>
+      <dt>Min wall</dt><dd>${B.min_divider} mm</dd>`;
+    const pr = problems();
+    $("problems").innerHTML = pr.length
+      ? `<div class="check"><b>${pr.length} clash${pr.length > 1 ? "es" : ""}</b>${pr.slice(0, 4).map(x => x.t).join("<br>")}${pr.length > 4 ? "<br>…" : ""}</div>`
+      : `<div class="okline">All pockets clear</div>`;
+  }
+
+  function renderSel() {
+    const p = sel && byId(sel);
+    if (!p) { $("selName").textContent = "Pick a pocket"; $("selBody").innerHTML = `<p class="muted" style="margin:0">Click one to change it.</p>`; return; }
+    const k = K[p.kind], f = foot(p);
+    $("selName").textContent = k.name;
+    let html = "";
+    if (k.shape === "box") {
+      html += `<div class="seg" role="group" aria-label="How they sit">
+        <button data-mode="flat" aria-pressed="${p.mode === "flat"}">Flat stack</button>
+        <button data-mode="edge" aria-pressed="${p.mode === "edge"}">On edge</button></div>
+        <div class="step"><label for="kIn">${p.mode === "flat" ? "Stacks side by side" : "Packs across"}</label>
+        <button id="kDn" aria-label="Fewer">−</button><input id="kIn" type="number" min="1" value="${count(p)}"><button id="kUp" aria-label="More">+</button></div>`;
+    }
+    const size = f.c ? `Ø ${r1(2 * f.r)}` : `${r1(2 * f.hw)} × ${r1(2 * f.hh)}`;
+    const e = edgeRoom(p);
+    const near = pockets.filter(q => q !== p).map(q => gap(p, q)).reduce((a, b) => Math.min(a, b), Infinity);
+    const wall = Math.min(near, e + B.wall);
+    html += `<dl class="facts">
+      <dt>Item</dt><dd>${k.shape === "circle" ? `Ø ${k.d} × ${k.h}` : `${k.l} × ${k.w} × ${k.t}`}</dd>
+      <dt>Pocket</dt><dd>${size} mm</dd>
+      <dt>Holds</dt><dd class="big">${cap(p)}</dd>
+      <dt>Item height</dt><dd class="${fill(p) > DEPTH ? "no" : ""}">${r1(fill(p))} mm</dd>
+      <dt>Pocket depth</dt><dd>${r1(pdepth(p))} mm</dd>
+      <dt>Sticks out</dt><dd>${r1(fill(p) - pdepth(p))} mm</dd>
+      <dt>Thinnest wall</dt><dd class="${wall < B.min_divider - 1e-6 ? "no" : "yes"}">${isFinite(wall) ? r1(wall) + " mm" : "–"}</dd>
+      <dt>Centre</dt><dd>${r1(p.x)}, ${r1(p.y)}</dd></dl>`;
+    $("selBody").innerHTML = html;
+    $("selBody").querySelectorAll("[data-mode]").forEach(b => b.onclick = () => setMode(p, b.dataset.mode));
+    if (k.shape === "box") {
+      $("kDn").onclick = () => setK(p, count(p) - stepOf(p));
+      $("kUp").onclick = () => setK(p, count(p) + stepOf(p));
+      $("kIn").onchange = ev => setK(p, parseInt(ev.target.value, 10) || 1);
+    }
+  }
+  const stepOf = p => (p.mode === "edge" && K[p.kind].t < 2 ? 5 : 1);
+
+  // ---- edits -----------------------------------------------------------
+  const push = () => { undo.push(JSON.stringify(pockets)); if (undo.length > 100) undo.shift(); };
+  const changed = () => { dirty = true; saveDraft(); setState("dirty", "Unsaved changes"); render(); };
+  function setMode(p, mode) {
+    if (p.mode === mode) return;
+    push();
+    const k = K[p.kind], across = count(p) * unit(p);
+    delete p.span; p.mode = mode; p.k = Math.max(1, Math.floor(across / (mode === "flat" ? k.w : k.t) + 1e-6));
+    changed();
+  }
+  function setK(p, n) { n = Math.max(1, Math.min(500, n)); if (n === count(p) && !p.span) { render(); return; } push(); delete p.span; p.k = n; changed(); }
+  function rotate() { const p = sel && byId(sel); if (!p || K[p.kind].shape === "circle") return; push(); p.rot = p.rot ? 0 : 90; changed(); }
+  function duplicate() {
+    const p = sel && byId(sel); if (!p) return; push();
+    let n = 2; while (byId(`${p.kind}-${n}`)) n++;
+    const q = { ...p, id: `${p.kind}-${n}`, x: snap(p.x + 6), y: snap(p.y - 6) };
+    pockets.push(q); sel = q.id; changed();
+  }
+  function remove() { if (!sel) return; push(); pockets = pockets.filter(p => p.id !== sel); sel = null; changed(); }
+  function nudge(dx, dy) { const p = sel && byId(sel); if (!p) return; push(); p.x = snap(p.x + dx); p.y = snap(p.y + dy); changed(); }
+
+  // ---- pointer ---------------------------------------------------------
+  const toMm = ev => { const pt = svg.createSVGPoint(); pt.x = ev.clientX; pt.y = ev.clientY; const q = pt.matrixTransform(svg.getScreenCTM().inverse()); return { x: q.x, y: -q.y }; };
+  let drag = null;
+  svg.addEventListener("pointerdown", ev => {
+    const g = ev.target.closest(".pk");
+    if (!g) { sel = null; render(); return; }
+    const p = byId(g.dataset.id); sel = p.id;
+    const m = toMm(ev);
+    drag = { p, ox: p.x - m.x, oy: p.y - m.y, before: JSON.stringify(pockets), moved: false };
+    svg.setPointerCapture(ev.pointerId); render();
+  });
+  svg.addEventListener("pointermove", ev => {
+    if (!drag) return;
+    const m = toMm(ev), nx = snap(m.x + drag.ox), ny = snap(m.y + drag.oy);
+    if (nx === drag.p.x && ny === drag.p.y) return;
+    drag.p.x = nx; drag.p.y = ny; drag.moved = true; render();
+    const g = svg.querySelector(`.pk[data-id="${drag.p.id}"]`); if (g) g.classList.add("drag");
+  });
+  const endDrag = () => {
+    if (!drag) return;
+    if (drag.moved) { undo.push(drag.before); changed(); }
+    drag = null;
+  };
+  svg.addEventListener("pointerup", endDrag);
+  svg.addEventListener("pointercancel", endDrag);
+
+  window.addEventListener("keydown", ev => {
+    if (ev.target.tagName === "INPUT") return;
+    const s = ev.shiftKey ? 5 : 0.5;
+    if ((ev.metaKey || ev.ctrlKey) && ev.key.toLowerCase() === "z") { ev.preventDefault(); $("btnUndo").click(); return; }
+    if (!sel) return;
+    const map = { ArrowLeft: [-s, 0], ArrowRight: [s, 0], ArrowUp: [0, s], ArrowDown: [0, -s] };
+    if (map[ev.key]) { ev.preventDefault(); nudge(...map[ev.key]); }
+    else if (ev.key === "r" || ev.key === "R") rotate();
+    else if (ev.key === "d" || ev.key === "D") duplicate();
+    else if (ev.key === "Delete" || ev.key === "Backspace") { ev.preventDefault(); remove(); }
+    else if (ev.key === "Escape") { sel = null; render(); }
+  });
+
+  $("btnUndo").onclick = () => { if (!undo.length) return; pockets = JSON.parse(undo.pop()); if (sel && !byId(sel)) sel = null; dirty = true; saveDraft(); setState("dirty", "Unsaved changes"); render(); };
+  $("btnRot").onclick = rotate;
+  $("btnDup").onclick = duplicate;
+  $("btnDel").onclick = remove;
+  $("btnReset").onclick = () => { push(); pockets = JSON.parse(START); sel = null; changed(); };
+
+  // ---- save ------------------------------------------------------------
+  const setState = (s, text) => { const e = $("state"); e.dataset.s = s; e.textContent = text; };
+  const hhmm = d => d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  const saveDraft = () => { try { localStorage.setItem(C.draft_key, JSON.stringify({ pockets, at: Date.now() })); } catch {} };
+  const loadDraft = () => { try { return JSON.parse(localStorage.getItem(C.draft_key) || "null"); } catch { return null; } };
+  const validList = a => Array.isArray(a) && a.every(p => p && K[p.kind] && isFinite(p.x) && isFinite(p.y));
+
+  function record(savedAt) {
+    const tot = {};
+    for (const p of pockets) tot[p.kind] = (tot[p.kind] || 0) + cap(p);
+    return {
+      pockets: pockets.map(p => {
+        const f = foot(p);
+        return { ...p, capacity: cap(p), fill_mm: r1(fill(p)), depth_mm: r1(pdepth(p)), floor_z_mm: r1(RIM - pdepth(p)), size_mm: f.c ? { d: r1(2 * f.r) } : { x: r1(2 * f.hw), y: r1(2 * f.hh) } };
+      }),
+      totals: tot,
+      clashes: problems().map(x => x.t),
+      clearance_mm: CL,
+      saved_at: savedAt,
+    };
+  }
+  // The store can apply a write before its promise settles, so after a few
+  // seconds read the doc back and confirm from what is actually stored.
+  $("btnSave").onclick = async () => {
+    if (!db) return;
+    const ref = db.doc(C.store_doc), savedAt = new Date().toISOString();
+    $("btnSave").disabled = true; setState("saving", "Saving");
+    const write = ref.set(JSON.parse(JSON.stringify(record(savedAt)))).then(() => "ok", err => err);
+    let result = await Promise.race([write, new Promise(r => setTimeout(() => r("slow"), 4000))]);
+    if (result === "slow") {
+      try { const snap = await ref.get(); result = snap.exists && snap.data().saved_at === savedAt ? "ok" : await write; }
+      catch { result = await write; }
+    }
+    $("btnSave").disabled = false;
+    if (result === "ok") { dirty = false; setState("saved", "Saved " + hhmm(new Date())); }
+    else setState("error", "Save failed: " + (result && result.code || "error") + ". Edits kept here");
+  };
+
+  window.addEventListener("resize", render);
+  drawBin(); render();
+  setState("", "Start layout");
+
+  (async () => {
+    // claude.ai artifact store, else the local helper (tools/viewer_server.py) saving to layout/saved.json
+    db = window.claude ? await window.claude.use("db")
+       : window.localDb ? await window.localDb({ [C.store_doc]: "saved.json" }) : null;
+    const draft = loadDraft();
+    if (!db) {
+      setState("local", "Saving unavailable here");
+      if (draft && validList(draft.pockets) && !dirty) { pockets = draft.pockets; render(); }
+      return;
+    }
+    $("btnSave").disabled = false;
+    try {
+      const snap = await db.doc(C.store_doc).get();
+      const d = snap.exists ? snap.data() : null;
+      const savedMs = d ? Date.parse(d.saved_at) : 0;
+      if (dirty) return;
+      if (draft && draft.at > savedMs + 1000 && validList(draft.pockets)) {
+        pockets = draft.pockets; dirty = true; render(); setState("dirty", "Unsaved edits restored");
+      } else if (d && validList(d.pockets)) {
+        pockets = d.pockets.map(({ id, kind, x, y, rot, mode, k, len, span }) => ({ id, kind, x, y, rot, mode, k, len, span })); render();
+        setState("saved", "Saved " + hhmm(new Date(savedMs)));
+      } else setState("", "Nothing saved yet");
+    } catch { /* keep the start layout */ }
+  })();
+})();
+</script>
