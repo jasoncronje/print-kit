@@ -1,6 +1,7 @@
 # Changelog
 
 ## 2026-11-12
+- README: "Made with print-kit" gallery of 36 printed parts (9 x 4 grid).
 - Brand kit: nozzle-and-layers mark in Colour shift (indigo to pink), lockups, one-colour and small cuts,
   plugin icon, README banners (light/dark), social preview, palette and usage guide in `brand/`.
 - 0.1.0: first version, generalized from the 3d-printz repo. Profile (`print-kit.json`) for printer, bed,

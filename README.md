@@ -23,6 +23,12 @@ Gridfinity bins.
 | `check_scad.py` | Exports every printable part and checks manifold, bed fit, first layer, Gridfinity feet, overhangs, clash parts |
 | Trace and layout editors | Trace a tool's outline from a photo, or lay out round and square pockets, and save straight into the project |
 
+## Made with print-kit
+
+![36 parts designed in code and printed at home](brand/prints-gallery.png)
+
+Stands, docks, enclosures, mounts, Gridfinity bins and keyboard parts, all designed with Claude and printed on a Bambu Lab P2S.
+
 ## Install
 
 ```
