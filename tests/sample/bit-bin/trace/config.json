@@ -1,0 +1,26 @@
+{
+  "title": "Bit driver trace",
+  "photo": "photo.png",
+  "px_per_in": 100,
+  "clearance_mm": 0.6,
+  "store_doc": "trace/current",
+  "draft_key": "sample-bit-driver-trace",
+  "start_points_px": [
+    [
+      60,
+      100
+    ],
+    [
+      340,
+      100
+    ],
+    [
+      340,
+      200
+    ],
+    [
+      60,
+      200
+    ]
+  ]
+}

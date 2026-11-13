@@ -1,6 +1,11 @@
 # Changelog
 
 ## 2026-11-13
+- Tests: `tests/editors_test.py` and a sample `bit-bin` build the photo-trace and layout editors,
+  serve them, save through the server and rebuild from the saved trace. Runs in CI on all three
+  systems. The pages' own drawing code still has no browser test.
+- README: private-repo login notes removed from the install guides; the slicer button's tested
+  scope (Bambu Studio on macOS only) is stated in the viewer section.
 - `check_scad.py` and `make_viewer.py` stop with "run /print-kit:setup" when no profile sets
   `printer.bed_mm`, instead of quietly checking against the default 220 mm bed (a part could pass
   for a bed the user doesn't have). A viewer config with its own `bed` still builds. `doctor.py`

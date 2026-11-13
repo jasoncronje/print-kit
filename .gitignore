@@ -4,3 +4,6 @@ __pycache__/
 brand/src/fonts/
 tests/sample/*/viewer/data.json
 tests/sample/*/viewer/index.html
+tests/sample/*/trace/index.html
+tests/sample/*/trace/photo.jpg
+tests/sample/*/layout/index.html

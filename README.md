@@ -40,8 +40,6 @@ Pick your system. Each guide is the whole install, first step to first part.
    /plugin install print-kit@print-kit
    ```
 
-   While the repo is private, you need read access and a GitHub login git can use (`gh auth login`).
-
 3. Open the folder you keep your prints in (any folder, ideally a git repo) and run:
 
    ```
@@ -89,8 +87,6 @@ brew install --cask openscad@snapshot   # the stable cask is disabled
    /plugin install print-kit@print-kit
    ```
 
-   While the repo is private, you need read access and a GitHub login git can use (`gh auth login`).
-
 4. Open the folder you keep your prints in (any folder, ideally a git repo) and run:
 
    ```
@@ -137,8 +133,6 @@ winget install OpenSCAD.OpenSCAD
    /plugin marketplace add jasoncronje/print-kit
    /plugin install print-kit@print-kit
    ```
-
-   While the repo is private, you need read access and a GitHub login git can use (`gh auth login`).
 
 4. Open the folder you keep your prints in (any folder, ideally a git repo) and run:
 
@@ -208,7 +202,7 @@ For `https://<name>.localhost` viewer URLs instead of a port number:
 </details>
 
 Every push is tested on fresh macOS, Windows and Ubuntu machines: OpenSCAD install, model checks,
-viewer build and the session hook.
+viewer build, the trace and layout editors, and the session hook.
 
 ## The 3D viewer
 
@@ -232,6 +226,10 @@ What you can do there:
 - **Look at the assembled model.** Spin it, pull the parts apart, cut through it, X-ray it, and measure between two points.
 - **Check the print plates.** Each plate is laid out on your printer's bed, with overhangs marked in red.
 - **Send a plate to your slicer.** One button opens it there. Without a slicer, it saves the plate's `.3mf`.
+
+The slicer button is tested with Bambu Studio on macOS. OrcaSlicer, PrusaSlicer and Cura, and every
+slicer on Windows and Linux, are set up from their documented install paths and not yet tried. If
+yours doesn't open, the page says so: use "Download all plates + STLs" and open the file yourself.
 
 It works offline: nothing loads from the internet.
 

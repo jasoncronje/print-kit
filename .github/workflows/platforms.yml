@@ -60,6 +60,9 @@ jobs:
           kill %1 || true
           cat server.log
 
+      - name: Trace and layout editors build, serve and save
+        run: $PY tests/editors_test.py
+
       - name: Session hook names this machine's Python and OpenSCAD
         run: |
           echo '{}' | CLAUDE_PROJECT_DIR=tests/sample/coaster CLAUDE_PLUGIN_ROOT=plugins/print-kit \

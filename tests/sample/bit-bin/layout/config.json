@@ -1,0 +1,53 @@
+{
+  "title": "Bit bin layout",
+  "bin": {
+    "label": "2×1",
+    "pitch": 42,
+    "units_x": 2,
+    "units_y": 1,
+    "outer_x": 83.5,
+    "outer_y": 41.5,
+    "corner_r": 3.75,
+    "wall": 2.0,
+    "min_divider": 2.5,
+    "floor_z": 7,
+    "rim_h": 21,
+    "top_limit": 26.5,
+    "hold": 0.6
+  },
+  "clearance_mm": 0.5,
+  "kinds": {
+    "bit": {
+      "name": "Hex bit",
+      "shape": "box",
+      "l": 25,
+      "w": 7,
+      "t": 7,
+      "tone": 1
+    }
+  },
+  "start_pockets": [
+    {
+      "id": "bit-1",
+      "kind": "bit",
+      "x": -20,
+      "y": 0,
+      "rot": 90,
+      "mode": "edge",
+      "k": 100,
+      "span": 27
+    },
+    {
+      "id": "bit-2",
+      "kind": "bit",
+      "x": 20,
+      "y": 0,
+      "rot": 90,
+      "mode": "edge",
+      "k": 100,
+      "span": 27
+    }
+  ],
+  "store_doc": "layout/current",
+  "draft_key": "sample-bit-bin-layout"
+}
