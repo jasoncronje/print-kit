@@ -64,4 +64,4 @@ jobs:
         run: |
           echo '{}' | CLAUDE_PROJECT_DIR=tests/sample/coaster CLAUDE_PLUGIN_ROOT=plugins/print-kit \
             $PY plugins/print-kit/scripts/session_context.py > hook.json
-          $PY -c "import json; c=json.load(open('hook.json', encoding='utf-8'))['hookSpecificOutput']['additionalContext']; line=[l for l in c.splitlines() if 'This machine' in l][0]; print(line); assert 'missing' not in line"
+          $PY -c "import json; c=json.load(open('hook.json', encoding='utf-8'))['hookSpecificOutput']['additionalContext']; line=[l for l in c.splitlines() if l.startswith('- This machine:')][0]; print(line); assert 'openscad' in line and 'missing' not in line"
