@@ -108,7 +108,7 @@ brew install --cask openscad@snapshot   # the stable cask is disabled
    Design a stand for my phone. Start with a fit test for the cradle.
    ```
 
-5. See it in 3D:
+6. See it in 3D:
 
    ```
    Show me the stand in the 3D viewer.
@@ -157,7 +157,7 @@ winget install OpenSCAD.OpenSCAD
    Design a stand for my phone. Start with a fit test for the cradle.
    ```
 
-5. See it in 3D:
+6. See it in 3D:
 
    ```
    Show me the stand in the 3D viewer.
