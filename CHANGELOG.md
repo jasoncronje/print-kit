@@ -1,6 +1,7 @@
 # Changelog
 
 ## 2026-11-12
+- README: short feature list instead of the parts table; step-by-step install with every command.
 - README: "Made with print-kit" gallery of 36 printed parts (9 x 4 grid).
 - Brand kit: nozzle-and-layers mark in Colour shift (indigo to pink), lockups, one-colour and small cuts,
   plugin icon, README banners (light/dark), social preview, palette and usage guide in `brand/`.

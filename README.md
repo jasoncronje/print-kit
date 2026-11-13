@@ -9,19 +9,14 @@ It gives Claude a set of house rules, a profile of your printer and slicer, and 
 that came out of designing and printing dozens of real parts: stands, docks, enclosures, mounts and
 Gridfinity bins.
 
-## What's in it
+## What you get
 
-| Piece | What it does |
-|---|---|
-| `/print-kit:setup` | Asks about your printer, bed, nozzle, slicer, materials and rules; writes `print-kit.json` and a `data/` folder |
-| Session rules | Loaded automatically in folders with a profile: project layout, fit and print rules, your profile |
-| `scad-design` skill | How to write a model: clearances from your own fit data, taste, printability, mechanisms, checks, self-critique |
-| `measure-and-fit` skill | Spec lookups, caliper-request pages, fit-test pieces and ladders, recording results |
-| `gridfinity-bin` skill | Outline-first workflow, tested base geometry, walls, scoops, labels |
-| `print-viewer` skill | Interactive 3D viewer: assembly, pull-apart, measure, X-ray, print plates on your bed with overhangs, Open in your slicer |
-| `design-reviewer` agent | Fresh-eyes review that builds and checks the parts before you print |
-| `check_scad.py` | Exports every printable part and checks manifold, bed fit, first layer, Gridfinity feet, overhangs, clash parts |
-| Trace and layout editors | Trace a tool's outline from a photo, or lay out round and square pockets, and save straight into the project |
+- **Setup for your printer.** One command asks about your printer, slicer and materials, then every part is sized for them.
+- **Design rules.** Claude follows tested clearances, printable shapes and a self-check before handing a part over.
+- **Fit tests.** Small, fast test prints for snaps, pockets and plugs, with the results remembered for next time.
+- **Model checks.** Every part is checked for bed fit, a flat first layer, overhangs and collisions.
+- **3D viewer.** Spin, explode and measure your model, see print plates on your bed, and open them in your slicer.
+- **Gridfinity bins.** Trace a tool from a photo and get a bin with a pocket shaped to fit it.
 
 ## Made with print-kit
 
@@ -31,26 +26,120 @@ Stands, docks, enclosures, mounts, Gridfinity bins and keyboard parts, all desig
 
 ## Install
 
+### 1. Claude Code
+
+Skip this if you already have it.
+
+```bash
+curl -fsSL https://claude.ai/install.sh | bash
+claude --version
+```
+
+### 2. OpenSCAD
+
+```bash
+# macOS (the stable cask is disabled in Homebrew; the snapshot is also much faster)
+brew install --cask openscad@snapshot
+
+# Linux (Debian/Ubuntu)
+sudo apt install openscad
+
+# Windows
+winget install OpenSCAD.OpenSCAD
+```
+
+Check it's on your PATH:
+
+```bash
+openscad --version
+```
+
+On macOS, if `openscad` isn't found after installing the app:
+
+```bash
+ln -s /Applications/OpenSCAD.app/Contents/MacOS/OpenSCAD "$(brew --prefix)/bin/openscad"
+```
+
+### 3. Python
+
+Python 3.9 or newer. Pillow is only needed for the photo-trace editor.
+
+```bash
+python3 --version
+python3 -m pip install pillow
+```
+
+### 4. A slicer (optional)
+
+Lets the viewer's "Open in slicer" button open a plate directly. Without one, the button saves the `.3mf`.
+
+```bash
+# macOS, pick yours
+brew install --cask bambu-studio
+brew install --cask orcaslicer
+brew install --cask prusaslicer
+brew install --cask ultimaker-cura
+```
+
+### 5. The plugin
+
+Inside Claude Code:
+
 ```
 /plugin marketplace add jasoncronje/print-kit
 /plugin install print-kit@print-kit
 ```
 
-Then, in the folder where you keep your print projects:
+Or from your terminal:
+
+```bash
+claude plugin marketplace add jasoncronje/print-kit
+claude plugin install print-kit@print-kit --scope user
+```
+
+While the repo is private, you need read access and a GitHub login git can use (`gh auth login`).
+
+### 6. Your projects folder
+
+```bash
+mkdir -p ~/prints && cd ~/prints
+git init          # optional, but print-kit commits your changes when it's a repo
+claude
+```
+
+Then, inside Claude Code:
 
 ```
 /print-kit:setup
 ```
 
-Start a new session (or `/clear`) after setup so the rules load.
+It checks for OpenSCAD and your slicer, asks a few questions, and writes `print-kit.json` and a `data/` folder.
+Start a new session (or `/clear`) afterwards so the rules load.
 
-## Needs
+### 7. Try it
 
-- [OpenSCAD](https://openscad.org) on your PATH (`openscad`).
-- Python 3.9+. Pillow only for the photo-trace editor (`pip install pillow`).
-- A slicer, if you want the viewer's "Open in <slicer>" button: Bambu Studio, OrcaSlicer, PrusaSlicer
-  or Cura. Without one, the button saves the plate's `.3mf`.
-- Optional: [Portless](https://github.com/vercel-labs/portless) for `https://<name>.localhost` URLs.
+```
+Design a stand for my phone. Start with a fit test for the cradle.
+```
+
+### Updating
+
+```bash
+claude plugin marketplace update print-kit
+claude plugin update print-kit@print-kit
+```
+
+Restart Claude Code to load the new version.
+
+### Optional: Portless
+
+For `https://<name>.localhost` viewer URLs instead of `http://127.0.0.1:<port>`:
+
+```bash
+npm install -g portless
+```
+
+Then answer yes when setup offers it, or set `"server": {"launcher": "portless"}` in `print-kit.json`.
 
 macOS is the tested platform. Linux and Windows should work with the matching `open_command`
 (setup fills it in).

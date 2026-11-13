@@ -25,7 +25,7 @@ and change only what the user asks.
 Ask only what you can't find out. Detect first:
 
 - OpenSCAD: `openscad --version`. Missing? Say how to install it (openscad.org, or
-  `brew install --cask openscad`, or the distro package) and continue.
+  `brew install --cask openscad@snapshot` on macOS, `sudo apt install openscad`, `winget install OpenSCAD.OpenSCAD`) and continue.
 - Slicers on disk: macOS `/Applications/{BambuStudio,OrcaSlicer,PrusaSlicer,UltiMaker Cura}.app`;
   Linux `which bambu-studio orca-slicer prusa-slicer cura`; Windows `Program Files`.
 - `portless` on PATH (`which portless`): offer `server.launcher = "portless"` if present.
