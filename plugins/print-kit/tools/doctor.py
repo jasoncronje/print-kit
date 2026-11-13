@@ -252,6 +252,9 @@ def main():
             link_on_mac(scad)
         rep = report()
         if not rep["openscad"]["ok"]:
+            for c in kit.openscad_candidates():   # show why each one fails
+                r = run([c, "--version"])
+                print(f"{c}: " + (f"exit {r.returncode}\n{(r.stdout + r.stderr).strip()[-1500:]}" if r else "would not start"))
             sys.exit("OpenSCAD installed but doesn't run; see the output above.")
     if "--json" in args:
         print(json.dumps(rep, indent=2))
