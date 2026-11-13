@@ -12,8 +12,8 @@ A build:
      that opens straight from disk (no server) and is what gets published as a
      claude.ai Artifact (only when asked). It isn't kept in git.
 
-viewer_server.py serves the shared template live instead, for Open in <slicer>
-in one click. --page rewrites index.html from the current data.json, e.g. after a
+viewer_server.py serves the shared template live instead, where one click opens
+a plate in your slicer. --page rewrites index.html from the current data.json, e.g. after a
 template change, without exporting meshes again.
 
 The artifact host won't serve .stl files, which is why meshes travel inside JSON.
@@ -33,6 +33,7 @@ from pathlib import Path
 
 TOOLS = Path(__file__).resolve().parent
 TEMPLATE = TOOLS / "viewer" / "template.html"
+VENDOR = TOOLS / "viewer" / "vendor"   # three.js r128 + OrbitControls + STLLoader (MIT)
 sys.path.insert(0, str(TOOLS))
 import kit_profile as kit  # noqa: E402
 OPENSCAD = kit.openscad()
@@ -162,6 +163,9 @@ def write_page(project):
     data = (out_dir / "data.json").read_text(encoding="utf-8").replace("</", "<\\/")
     html = TEMPLATE.read_text(encoding="utf-8").replace("__TITLE__", cfg.get("title", project.name))
     html = html.replace("<!--VIEWER_DATA-->", f'<script id="viewer-data" type="application/json">{data}</script>', 1)
+    # the 3D library goes inline too, so the page works from disk and offline
+    html = re.sub(r'<script src="vendor/([\w.-]+)"></script>',
+                  lambda m: "<script>" + (VENDOR / m[1]).read_text(encoding="utf-8").replace("</script", "<\\/script") + "</script>", html)
     (out_dir / "index.html").write_text(html, encoding="utf-8")
     shown = shown_path(out_dir)
     print(f"  -> {shown}/index.html (static, opens from disk; not kept in git)")

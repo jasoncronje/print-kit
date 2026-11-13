@@ -212,6 +212,11 @@ viewer build and the session hook.
 
 ## The 3D viewer
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="brand/viewer-dark.jpg">
+  <img alt="The 3D viewer: a box and lid pulled apart, with a parts list and a floor grid" src="brand/viewer-light.jpg" width="100%">
+</picture>
+
 Every design gets an interactive 3D page, built by Claude and opened inside Claude Code. Ask for it
 in plain words:
 
@@ -227,6 +232,8 @@ What you can do there:
 - **Look at the assembled model.** Spin it, pull the parts apart, cut through it, X-ray it, and measure between two points.
 - **Check the print plates.** Each plate is laid out on your printer's bed, with overhangs marked in red.
 - **Send a plate to your slicer.** One button opens it there. Without a slicer, it saves the plate's `.3mf`.
+
+It works offline: nothing loads from the internet.
 
 The viewer closes itself about 5 minutes after you close its tab. Ask again to bring it back.
 

@@ -7,201 +7,265 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&display=swap">
 <style>
 /* Layout: a 48px top bar (title, mode tabs, camera views), then three
-   columns on the ground: parts, the model in a flat well, the selected
-   part. The tool bar sits inside the well's bottom edge. On phones it all
-   stacks. Chrome is ink on neutral grey with no hue of its own; colour is
-   for the parts' filament, the brass bed and overhang red.
-   Served live to every project by tools/viewer_server.py. */
+   columns: parts, the model in a flat well, the selected part. Only the
+   well is framed; the side columns sit straight on the ground. The tool
+   bar sits inside the well's bottom edge. Tablets keep the parts column
+   beside the well; phones stack. Chrome is ink on neutral grey with no
+   hue of its own; colour is for the parts' filament, the brass bed and
+   overhang red.
+   Served live to every project by viewer_server.py. */
 :root {
-  --ground: #f4f4f3;
+  --ground: #fafaf9;
   --surface: #ffffff;
-  --well: #e9e9e7;
-  --active: #ececeb;
-  --border: #e3e3e1;
-  --rule: #efefed;
-  --control: #d4d4d2;
+  --well: #ededeb;
+  --active: #ebebe9;
+  --border: #e2e2e0;
+  --rule: #ececea;
+  --control: #cfcfcc;
   --ink: #0f0f0f;
   --muted: #626262;
   --primary: #161616;
   --primary-ink: #ffffff;
   --warn: #b9441f;
-  --warn-soft: #fbece6;
   --font: "Geist", Inter, "Helvetica Neue", Arial, sans-serif;
-  --radius: 8px;
+  --radius: 10px;
   --radius-control: 6px;
   --gap: 8px;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --ground: #0d0d0d; --surface: #161616; --well: #1c1c1c; --active: #262626; --border: #242424;
-    --rule: #1f1f1f; --control: #3a3a3a; --ink: #f2f2f2; --muted: #a3a3a3; --primary: #f2f2f2;
-    --primary-ink: #111111; --warn: #f08d66; --warn-soft: #2e1d17; color-scheme: dark;
+    --ground: #0c0c0c; --surface: #1b1b1b; --well: #161616; --active: #232323; --border: #282828;
+    --rule: #1e1e1e; --control: #3a3a3a; --ink: #f2f2f2; --muted: #a3a3a3; --primary: #f2f2f2;
+    --primary-ink: #111111; --warn: #f08d66; color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
-  --ground: #0d0d0d; --surface: #161616; --well: #1c1c1c; --active: #262626; --border: #242424;
-  --rule: #1f1f1f; --control: #3a3a3a; --ink: #f2f2f2; --muted: #a3a3a3; --primary: #f2f2f2;
-  --primary-ink: #111111; --warn: #f08d66; --warn-soft: #2e1d17; color-scheme: dark;
+  --ground: #0c0c0c; --surface: #1b1b1b; --well: #161616; --active: #232323; --border: #282828;
+  --rule: #1e1e1e; --control: #3a3a3a; --ink: #f2f2f2; --muted: #a3a3a3; --primary: #f2f2f2;
+  --primary-ink: #111111; --warn: #f08d66; color-scheme: dark;
 }
 
 * { box-sizing: border-box; }
 html, body { height: 100%; margin: 0; }
-body { background: var(--ground); color: var(--ink); font: 14px/20px var(--font); overflow: hidden; font-variant-numeric: tabular-nums; }
+body { background: var(--ground); color: var(--ink); font: 14px/20px var(--font); overflow: hidden; font-variant-numeric: tabular-nums; -webkit-font-smoothing: antialiased; }
 button { font: inherit; color: inherit; }
 button:focus-visible, input:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
 [hidden], .status[hidden] { display: none !important; }
 
-.app { height: 100%; display: grid; grid-template-columns: 248px minmax(0, 1fr) 304px; grid-template-rows: 48px minmax(0, 1fr);
-  gap: var(--gap); padding: 0 var(--gap) var(--gap); padding-left: max(var(--gap), env(safe-area-inset-left, 0px)); padding-right: max(var(--gap), env(safe-area-inset-right, 0px)); }
-.app.no-info { grid-template-columns: 248px minmax(0, 1fr); }
-.panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); }
+.app { height: 100%; display: grid; grid-template-columns: 264px minmax(0, 1fr) 296px; grid-template-rows: 48px minmax(0, 1fr);
+  column-gap: var(--gap); padding: 0 var(--gap) var(--gap); padding-left: max(var(--gap), env(safe-area-inset-left, 0px)); padding-right: max(var(--gap), env(safe-area-inset-right, 0px)); }
+.app.no-info { grid-template-columns: 264px minmax(0, 1fr); }
 
 /* top bar */
-.bar { grid-column: 1 / -1; display: flex; align-items: center; gap: 24px; min-width: 0; padding: 0 8px; }
-h1 { margin: 0; font-size: 16px; line-height: 20px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bar { grid-column: 1 / -1; display: flex; align-items: center; gap: 20px; min-width: 0; padding: 0 8px; }
+.brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.brand svg { flex: none; width: 18px; height: 18px; }
+h1 { margin: 0; font-size: 16px; line-height: 20px; font-weight: 600; letter-spacing: -0.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.stamp { flex: none; font-size: 12px; color: var(--muted); white-space: nowrap; }
 .seg { display: flex; gap: 16px; align-self: stretch; }
-.seg button { border: 0; background: none; padding: 0; font-size: 14px; font-weight: 500; color: var(--muted); cursor: pointer; box-shadow: inset 0 -2px 0 transparent; }
+.seg button { border: 0; border-bottom: 2px solid transparent; border-top: 2px solid transparent; background: none; padding: 0; font-size: 14px; font-weight: 500; color: var(--muted); cursor: pointer; white-space: nowrap; }
 .seg button:hover { color: var(--ink); }
-.seg button[aria-pressed="true"] { color: var(--ink); box-shadow: inset 0 -2px 0 var(--ink); }
+.seg button[aria-pressed="true"] { color: var(--ink); border-bottom-color: var(--ink); }
 .seg button:disabled { display: none; }
-.views { margin-left: auto; display: flex; gap: 2px; overflow-x: auto; scrollbar-width: none; }
-.views button { border: 0; background: none; border-radius: var(--radius-control); height: 28px; padding: 0 9px; font-size: 13px; color: var(--muted); cursor: pointer; white-space: nowrap; }
-.views button:hover { color: var(--ink); }
-.views button[aria-pressed="true"] { color: var(--ink); background: var(--active); }
+.views { margin-left: auto; display: flex; align-items: center; gap: 2px; min-width: 0; overflow-x: auto; scrollbar-width: none; }
+.views::-webkit-scrollbar { display: none; }
+.views button { flex: none; border: 0; background: none; border-radius: var(--radius-control); height: 28px; padding: 0 9px; font-size: 13px; color: var(--muted); cursor: pointer; white-space: nowrap; }
+.views button:hover { color: var(--ink); background: var(--active); }
+.views button[aria-pressed="true"] { color: var(--ink); background: var(--active); font-weight: 500; }
+.views .sep { flex: none; width: 1px; height: 16px; margin: 0 6px; background: var(--border); }
 
 /* stage: the model in a flat well */
 .stage { position: relative; grid-column: 2; grid-row: 2; background: var(--well); border-radius: var(--radius); overflow: hidden; min-height: 0; }
-.stage canvas { position: absolute; inset: 0; display: block; width: 100%; height: 100%; touch-action: none; }
+.stage canvas { position: absolute; inset: 0; display: block; width: 100%; height: 100%; touch-action: none; cursor: grab; }
+.stage canvas:active { cursor: grabbing; }
 .stage.measuring canvas { cursor: crosshair; }
 .status { position: absolute; inset: 0; display: grid; place-items: center; padding: 20px; text-align: center; color: var(--muted); pointer-events: none; }
 
-/* parts */
-.parts-panel { grid-column: 1; grid-row: 2; align-self: start; max-height: 100%; overflow-y: auto; padding: 6px; display: flex; flex-direction: column; gap: 6px; }
-.parts { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+/* side columns, straight on the ground */
+.side, .info { min-height: 0; overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--control) transparent; }
+.side { grid-column: 1; grid-row: 2; padding: 0 0 8px; display: flex; flex-direction: column; }
+.hd { display: flex; align-items: center; gap: 6px; height: 32px; padding: 0 8px; font-size: 12px; color: var(--muted); }
+.hd h2 { margin: 0; font: inherit; }
+.hd .link { margin-left: auto; }
+.parts { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
 .row { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; border-radius: var(--radius-control); }
-.row:hover { background: var(--active); }
-.row.sel { background: var(--active); box-shadow: inset 0 0 0 1px var(--control); }
-.row .name { border: 0; background: none; text-align: left; height: 34px; padding: 0 8px; cursor: pointer; display: flex; align-items: center; gap: 10px; min-width: 0; }
-.row .name span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.row .qty { color: var(--muted); font-size: 12px; margin-left: auto; padding-left: 6px; }
-/* swatch reads as a spool end: filament colour ring around a hub */
-.sw { flex: none; width: 14px; height: 14px; border-radius: 50%; background: radial-gradient(circle, var(--surface) 0 2px, var(--sw) 2.5px); box-shadow: inset 0 0 0 1px rgba(0,0,0,0.12); }
-.row.ctx .sw { background: none; box-shadow: inset 0 0 0 2px var(--sw); }
+.row:hover, .row.sel { background: var(--active); }
+.row .name { border: 0; background: none; text-align: left; height: 32px; padding: 0 2px 0 8px; cursor: pointer; display: flex; align-items: center; gap: 10px; min-width: 0; }
+.row .label { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.row.sel .label { font-weight: 500; }
+.row .qty { flex: none; color: var(--muted); font-size: 12px; }
+/* swatch reads as a spool end: a ring of filament around the hub; context items get a thin ring */
+.sw { flex: none; width: 14px; height: 14px; border-radius: 50%; border: 4px solid var(--sw); outline: 1px solid rgba(128, 128, 128, 0.35); outline-offset: -1px; }
+.row.ctx .sw { border-width: 2px; }
 .row.off .name { color: var(--muted); }
 .row.off .sw { opacity: 0.35; }
-.row .eye { width: 30px; height: 30px; border: 0; background: none; border-radius: var(--radius-control); cursor: pointer; display: grid; place-items: center; color: var(--muted); }
+.row .eye { width: 30px; height: 32px; border: 0; background: none; border-radius: var(--radius-control); cursor: pointer; display: grid; place-items: center; color: var(--muted); opacity: 0; }
+.row:hover .eye, .row:focus-within .eye, .row.off .eye { opacity: 1; }
 .row .eye:hover { color: var(--ink); }
 .row .eye svg { width: 16px; height: 16px; }
-.row .eye[aria-pressed="false"] { opacity: 0.35; }
-.panel-foot { display: flex; justify-content: flex-end; padding: 0 4px; }
-.link { border: 0; background: none; padding: 2px 4px; color: var(--muted); font-size: 13px; font-weight: 500; cursor: pointer; text-decoration: underline; text-decoration-color: var(--control); text-underline-offset: 3px; }
-.link:hover { color: var(--ink); text-decoration-color: currentColor; }
+.link { border: 0; background: none; border-radius: 4px; padding: 2px 6px; color: var(--muted); font-size: 12px; font-weight: 500; cursor: pointer; white-space: nowrap; }
+.link:hover { color: var(--ink); background: var(--active); }
 
-.tabs { display: flex; flex-wrap: wrap; gap: 4px; padding: 2px; }
-.tab { border: 1px solid var(--border); background: none; border-radius: var(--radius-control); height: 28px; padding: 0 10px; font-size: 13px; cursor: pointer; color: var(--muted); }
-.tab:hover { color: var(--ink); }
-.tab[aria-selected="true"] { background: var(--active); border-color: var(--control); color: var(--ink); }
+.tabs { display: flex; flex-wrap: wrap; gap: 4px; padding: 0 4px 4px; }
+.tab { flex: none; border: 1px solid var(--border); background: none; border-radius: var(--radius-control); height: 28px; padding: 0 10px; font-size: 13px; cursor: pointer; color: var(--muted); white-space: nowrap; }
+.tab:hover { color: var(--ink); border-color: var(--control); }
+.tab[aria-selected="true"] { background: var(--active); border-color: var(--control); color: var(--ink); font-weight: 500; }
 .note { margin: 0; padding: 0 8px; font-size: 13px; color: var(--muted); }
-.note.warn { color: var(--warn); }
-.print-tools { display: flex; flex-direction: column; gap: 4px; padding: 8px 2px 2px; border-top: 1px solid var(--rule); }
-.toggle { display: flex; gap: 8px; align-items: center; height: 32px; padding: 0 6px; font-size: 14px; cursor: pointer; }
-.toggle input { accent-color: var(--warn); width: 15px; height: 15px; margin: 0; }
-.toggle .stat { margin-left: auto; color: var(--muted); font-size: 13px; }
-.primary { border: 0; border-radius: var(--radius-control); height: 36px; padding: 0 12px; background: var(--primary); color: var(--primary-ink); font-weight: 500; cursor: pointer; display: flex; justify-content: space-between; align-items: center; gap: 8px; white-space: nowrap; }
+.note:empty { display: none; }
+.note.warn { color: var(--warn); padding-top: 6px; }
+.print-tools { display: flex; flex-direction: column; gap: 2px; margin-top: 8px; padding: 8px 0 0; border-top: 1px solid var(--rule); }
+.toggle { display: flex; gap: 10px; align-items: center; height: 32px; padding: 0 8px; font-size: 14px; cursor: pointer; }
+.toggle input { accent-color: var(--warn); width: 14px; height: 14px; margin: 0; }
+.toggle .stat { margin-left: auto; color: var(--muted); font-size: 12px; }
+.primary { border: 0; border-radius: var(--radius-control); height: 36px; margin: 4px 0; padding: 0 12px; background: var(--primary); color: var(--primary-ink); font-weight: 500; cursor: pointer; display: flex; justify-content: space-between; align-items: center; gap: 8px; white-space: nowrap; }
+.primary:hover:not(:disabled) { opacity: 0.88; }
+.primary:active:not(:disabled) { transform: translateY(1px); }
 .primary small { font-size: 12px; opacity: 0.7; }
-.ghost { border: 0; background: none; border-radius: var(--radius-control); height: 32px; padding: 0 6px; text-align: left; font-size: 13px; color: var(--muted); cursor: pointer; }
-.ghost:hover { color: var(--ink); background: var(--active); }
+.ghost { border: 0; background: none; border-radius: var(--radius-control); height: 32px; padding: 0 8px; text-align: left; font-size: 13px; color: var(--muted); cursor: pointer; }
+.ghost:hover:not(:disabled) { color: var(--ink); background: var(--active); }
 .primary:disabled, .ghost:disabled { opacity: 0.45; cursor: default; }
 
-/* selected part */
-.info { grid-column: 3; grid-row: 2; align-self: start; max-height: 100%; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 14px; }
-.info h2 { margin: 0; font-size: 16px; line-height: 20px; font-weight: 600; }
+/* selected part, or the model / plate when nothing is selected */
+.info { grid-column: 3; grid-row: 2; padding: 6px 8px 12px; display: flex; flex-direction: column; gap: 14px; }
+.info h2 { margin: 0; font-size: 16px; line-height: 20px; font-weight: 600; letter-spacing: -0.01em; }
 .info p { margin: 0; }
 .plate-note { font-size: 13px; color: var(--muted); }
-.facts { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 6px 16px; margin: 0; font-size: 13px; }
+.facts { display: grid; grid-template-columns: fit-content(42%) minmax(0, 1fr); gap: 6px 16px; margin: 0; font-size: 13px; }
 .facts dt { color: var(--muted); }
 .facts dd { margin: 0; }
 .tags { display: flex; flex-wrap: wrap; gap: 4px; }
 .tags span { flex: none; white-space: nowrap; border-radius: 4px; padding: 1px 6px; background: var(--active); font-size: 12px; line-height: 18px; }
 .check { border-left: 2px solid var(--warn); padding: 2px 0 2px 10px; font-size: 13px; }
 .check b { display: block; color: var(--warn); font-weight: 500; font-size: 12px; }
-.info .acts { display: flex; gap: 12px; margin: 0 -4px; }
+.info .acts { display: flex; gap: 6px; }
+.btn { border: 1px solid var(--control); background: none; border-radius: var(--radius-control); height: 28px; padding: 0 10px; font-size: 13px; font-weight: 500; cursor: pointer; white-space: nowrap; }
+.btn:hover { background: var(--active); }
 
-/* look: filament colour + opacity, for one part (info card) or all parts (parts panel) */
-.look { display: grid; gap: 8px; font-size: 13px; }
-.parts-panel .look { padding: 10px 6px 4px; border-top: 1px solid var(--rule); }
-.info .look { padding-top: 12px; border-top: 1px solid var(--rule); }
-.look .hd { display: flex; align-items: center; justify-content: space-between; color: var(--muted); }
-.look .sws { display: flex; flex-wrap: wrap; gap: 4px 5px; align-items: center; }
-.swb { width: 16px; height: 16px; padding: 0; border-radius: 50%; border: 0; background: var(--c); box-shadow: inset 0 0 0 1px rgba(128,128,128,0.35); cursor: pointer; }
+/* look: filament colour + opacity, for one part (info column) or all parts (parts column) */
+.look { display: grid; grid-template-columns: minmax(0, 1fr); gap: 6px; font-size: 13px; }
+.side .look { margin-top: 12px; padding: 4px 0 0; border-top: 1px solid var(--rule); }
+.info .look { padding-top: 6px; border-top: 1px solid var(--rule); }
+.look .hd { padding: 0 8px; }
+.info .look .hd { padding: 0; }
+.look .sws { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; padding: 0 8px; }
+.look .op { padding: 0 8px; }
+.info .look .sws, .info .look .op { padding: 0; }
+.swb { width: 16px; height: 16px; padding: 0; border-radius: 50%; border: 0; background: var(--c); outline: 1px solid rgba(128, 128, 128, 0.35); outline-offset: -1px; cursor: pointer; }
+.swb:hover { transform: scale(1.15); }
 .swb[aria-pressed="true"] { outline: 2px solid var(--ink); outline-offset: 2px; }
 .look input[type="color"] { width: 16px; height: 16px; padding: 0; border: 1px dashed var(--muted); border-radius: 50%; background: none; cursor: pointer; }
 .look input[type="color"]::-webkit-color-swatch-wrapper { padding: 2px; }
 .look input[type="color"]::-webkit-color-swatch { border: 0; border-radius: 50%; }
 .look input[type="color"]::-moz-color-swatch { border: 0; border-radius: 50%; }
-.look .op { display: flex; align-items: center; gap: 10px; color: var(--muted); }
-.look .op input { flex: 1; min-width: 0; accent-color: var(--ink); }
-.look .op .val { min-width: 4ch; text-align: right; color: var(--ink); }
+.look .op { display: flex; align-items: center; gap: 10px; height: 28px; color: var(--muted); }
+.look .op input { flex: 1; min-width: 0; }
+.look .op .val { flex: none; min-width: 4ch; text-align: right; color: var(--ink); }
+
+/* sliders: a 2px track and an ink thumb, the same in every browser */
+input[type="range"] { -webkit-appearance: none; appearance: none; height: 16px; margin: 0; background: none; cursor: pointer; }
+input[type="range"]::-webkit-slider-runnable-track { height: 2px; border-radius: 1px; background: var(--control); }
+input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 12px; height: 12px; margin-top: -5px; border: 0; border-radius: 50%; background: var(--ink); }
+input[type="range"]::-moz-range-track { height: 2px; border-radius: 1px; background: var(--control); }
+input[type="range"]::-moz-range-thumb { width: 12px; height: 12px; border: 0; border-radius: 50%; background: var(--ink); }
 
 /* tool bar, inside the well's bottom edge */
 .dock { position: absolute; left: 50%; bottom: 12px; transform: translateX(-50%); display: flex; align-items: center; gap: 2px; padding: 4px;
   background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); width: max-content; max-width: calc(100% - 24px); flex-wrap: wrap; justify-content: center; }
 .dock .sep { width: 1px; align-self: stretch; margin: 4px 6px; background: var(--border); }
-.tool { border: 0; background: none; border-radius: var(--radius-control); height: 30px; padding: 0 12px; font-size: 13px; font-weight: 500; color: var(--muted); cursor: pointer; white-space: nowrap; }
-.tool:hover { color: var(--ink); }
+.tool { border: 0; background: none; border-radius: var(--radius-control); height: 30px; padding: 0 10px; font-size: 13px; font-weight: 500; color: var(--muted); cursor: pointer; white-space: nowrap; display: inline-flex; align-items: center; gap: 8px; }
+.tool:hover { color: var(--ink); background: var(--active); }
 .tool[aria-pressed="true"] { background: var(--primary); color: var(--primary-ink); }
+.tool .key { font-size: 12px; font-weight: 400; opacity: 0.6; }
+/* a display setting that is on by default, so its on state stays quiet */
+.tool.quiet[aria-pressed="true"] { background: var(--active); color: var(--ink); }
+.tool.off-mode { display: none; }
+/* the cut controls need the room: drop the key hints and shorten the sliders */
+.dock.splitting .key { display: none; }
+.dock.splitting .slider input { width: 96px; }
 .slider { display: flex; align-items: center; gap: 10px; padding: 0 8px; font-size: 13px; color: var(--muted); white-space: nowrap; }
-.slider input { width: 120px; accent-color: var(--ink); }
+.slider input { width: 120px; }
 .slider.off-mode, .slider.off-mode + .sep { display: none; }
 .slider .val { min-width: 4ch; text-align: right; color: var(--ink); }
 .axis { display: inline-flex; gap: 2px; }
 .axis button { border: 0; background: none; border-radius: var(--radius-control); height: 26px; padding: 0 8px; font-size: 13px; color: var(--muted); cursor: pointer; }
+.axis button:hover { color: var(--ink); }
 .axis button[aria-pressed="true"] { background: var(--active); color: var(--ink); }
 
-.readout { position: absolute; left: 50%; top: 12px; transform: translateX(-50%); padding: 5px 10px; border-radius: var(--radius-control); font-size: 13px; white-space: nowrap; pointer-events: none; }
+.readout { position: absolute; left: 50%; top: 12px; transform: translateX(-50%); padding: 5px 10px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-control); font-size: 13px; white-space: nowrap; max-width: calc(100% - 24px); overflow: hidden; text-overflow: ellipsis; pointer-events: none; }
 .mlabel { position: absolute; transform: translate(-50%, -140%); pointer-events: none; background: var(--primary); color: var(--primary-ink); border-radius: 4px; padding: 2px 7px; font-size: 12px; font-weight: 500; white-space: nowrap; }
 
+/* tablet: the parts column stays beside the well, the info column drops under it */
 @media (max-width: 1000px) {
-  body { overflow: auto; }
-  .app, .app.no-info { height: auto; min-height: 100%; grid-template-columns: minmax(0, 1fr); grid-template-rows: auto; padding: 0 16px 16px; gap: 12px; }
-  .bar { flex-wrap: wrap; gap: 6px 16px; padding: 10px 0 0; }
+  .app, .app.no-info { grid-template-columns: 240px minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr) auto; }
+  .bar { flex-wrap: wrap; gap: 4px 16px; padding: 8px 8px 6px; }
   .seg { height: 32px; }
-  .views { order: 3; flex-basis: 100%; justify-content: space-between; }
-  .views button { padding: 0 6px; }
-  .stage { grid-column: 1; grid-row: auto; order: 1; height: max(60vh, 340px); }
-  .dock { left: 8px; right: 8px; bottom: 8px; transform: none; width: auto; max-width: none; }
-  .parts-panel { order: 2; }
-  .info { order: 3; }
-  .parts-panel, .info { grid-column: 1; grid-row: auto; max-height: none; }
-  .row .name, .tool, .ghost { min-height: 40px; }
+  .stamp { display: none; }
+  .views { order: 3; flex-basis: 100%; margin-left: -9px; }
+  .stage { grid-row: 2 / 4; }
+  .info { grid-column: 1; grid-row: 3; max-height: 42vh; margin-top: 8px; padding-top: 12px; border-top: 1px solid var(--rule); }
+  .tool .key { display: none; }
+  .look .sws { gap: 4px; }
 }
-@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto; } }
+/* phone: everything stacks under the well */
+@media (max-width: 640px) {
+  body { overflow: auto; }
+  .app, .app.no-info { height: auto; min-height: 100%; grid-template-columns: minmax(0, 1fr); grid-template-rows: auto; padding: 0 16px 24px; row-gap: 12px; }
+  .bar { padding: 10px 0 0; }
+  .stage { grid-column: 1; grid-row: auto; order: 1; height: max(56vh, 320px); }
+  .dock { left: 8px; right: 8px; bottom: 8px; transform: none; width: auto; max-width: none; flex-wrap: nowrap; justify-content: flex-start; overflow-x: auto; scrollbar-width: none; }
+  .dock::-webkit-scrollbar { display: none; }
+  .dock > * { flex: none; }
+  .dock .tool { flex: 1 0 auto; justify-content: center; }
+  .dock #explodeCtl { flex: 1 1 0; min-width: 132px; }
+  .slider .t { display: none; }
+  .slider input { flex: 1; width: auto; min-width: 56px; }
+  .side { order: 2; padding: 0; }
+  .info { order: 3; max-height: none; margin: 0; }
+  .side, .info { grid-column: 1; grid-row: auto; overflow: visible; }
+  .row .name, .row .eye, .tool, .ghost, .toggle { height: 44px; }
+  .tab, .btn { height: 36px; }
+  .swb, .look input[type="color"] { width: 22px; height: 22px; }
+  .look .sws { gap: 8px; }
+  .views { margin-left: -6px; }
+  .views button { padding: 0 6px; }
+  .views .sep { margin: 0 2px; }
+  .look .op { height: 40px; }
+}
+@media (hover: none) { .row .eye { opacity: 1; } .tool .key { display: none; } }
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto; } .primary:active:not(:disabled) { transform: none; } }
 </style>
 
 <div class="app" id="app">
   <header class="bar">
-    <h1 id="title">__TITLE__</h1>
+    <div class="brand">
+      <!-- the mark: a part going down in layers -->
+      <svg viewBox="0 0 18 18" fill="currentColor" aria-hidden="true"><rect x="2" y="13" width="14" height="3" rx="1"/><rect x="4" y="8.5" width="10" height="3" rx="1"/><rect x="6" y="4" width="6" height="3" rx="1"/></svg>
+      <h1 id="title">__TITLE__</h1>
+    </div>
     <div class="seg" role="group" aria-label="Mode">
       <button type="button" id="modeAsm" aria-pressed="true">Assembled</button>
       <button type="button" id="modePrint" aria-pressed="false">Print plates</button>
     </div>
+    <span class="stamp" id="stamp" hidden></span>
     <div class="views" id="views" role="group" aria-label="Camera views"></div>
   </header>
 
-  <aside class="parts-panel panel" id="partsPanel">
+  <aside class="side" id="partsPanel">
     <div id="asmSec">
+      <div class="hd"><h2>Parts</h2><span id="asmCount"></span><button type="button" class="link" data-show-all hidden>Show all</button></div>
       <ul class="parts" id="asmParts" aria-label="Parts"></ul>
-      <div class="panel-foot"><button type="button" class="link" id="showAll">Show all</button></div>
     </div>
     <div id="printSec" hidden>
+      <div class="hd"><h2>Plates</h2><span id="plateCount"></span></div>
       <div class="tabs" id="plateTabs" role="tablist" aria-label="Plates"></div>
+      <div class="hd"><h2>On this plate</h2><span id="printCount"></span><button type="button" class="link" data-show-all hidden>Show all</button></div>
       <ul class="parts" id="printParts" aria-label="Parts on this plate"></ul>
       <p class="note" id="plateNote" hidden></p>
       <div class="print-tools">
         <label class="toggle"><input type="checkbox" id="overhangs"> Overhangs over 45°<span class="stat" id="overhangNote"></span></label>
-        <button type="button" class="primary" id="bambuPlate" disabled><span id="slicerLabel">Save plate</span> <small id="bambuHint"></small></button>
-        <button type="button" class="ghost" id="bambuAll" disabled>Download all plates + STLs</button>
-        <button type="button" class="ghost" id="askClaude">Copy load request</button>
+        <button type="button" class="primary" id="sendPlate" disabled><span id="sendLabel">Download plate</span> <small id="sendHint"></small></button>
+        <button type="button" class="ghost" id="saveAll" disabled>Download all plates + STLs</button>
+        <button type="button" class="ghost" id="loadRequest" hidden>Copy load request</button>
         <p class="note" id="dlNote" aria-live="polite"></p>
       </div>
     </div>
@@ -212,11 +276,11 @@ h1 { margin: 0; font-size: 16px; line-height: 20px; font-weight: 600; white-spac
     <canvas id="c" aria-label="3D model. Drag to rotate, scroll or + and − to zoom, right-drag to pan, click a part to select it."></canvas>
     <div class="status" id="status">Loading…</div>
     <div class="mlabel" id="mlabel" hidden></div>
-    <div class="readout panel" id="readout" hidden></div>
+    <div class="readout" id="readout" hidden></div>
     <div class="dock" id="dock">
-      <label class="slider" id="explodeCtl">Pull apart <input type="range" id="explode" min="0" max="100" value="0"><span class="val" id="explodeVal">0%</span></label>
+      <label class="slider" id="explodeCtl"><span class="t">Pull apart</span> <input type="range" id="explode" min="0" max="100" value="0" aria-label="Pull apart"><span class="val" id="explodeVal">0%</span></label>
       <span class="sep" id="explodeSep"></span>
-      <button type="button" class="tool" id="toolSplit" aria-pressed="false" title="S">Split</button>
+      <button type="button" class="tool" id="toolSplit" aria-pressed="false" title="Cut the model open (S)">Split <span class="key" aria-hidden="true">S</span></button>
       <span id="splitCtl" class="slider" hidden>
         <span class="axis" role="group" aria-label="Cut direction">
           <button type="button" data-axis="x" aria-pressed="true">Side</button>
@@ -226,25 +290,28 @@ h1 { margin: 0; font-size: 16px; line-height: 20px; font-weight: 600; white-spac
         <input type="range" id="cut" min="0" max="1000" value="500" aria-label="Cut position">
         <button type="button" class="link" id="flipCut">Flip</button>
       </span>
-      <button type="button" class="tool" id="toolMeasure" aria-pressed="false" title="M">Measure</button>
-      <button type="button" class="tool" id="toolXray" aria-pressed="false" title="X">X-ray</button>
+      <button type="button" class="tool" id="toolMeasure" aria-pressed="false" title="Measure between two points (M)">Measure <span class="key" aria-hidden="true">M</span></button>
+      <button type="button" class="tool" id="toolXray" aria-pressed="false" title="See through to the selected part (X)">X-ray <span class="key" aria-hidden="true">X</span></button>
+      <button type="button" class="tool quiet" id="toolGrid" aria-pressed="true" title="Floor grid (G)">Grid <span class="key" aria-hidden="true">G</span></button>
     </div>
   </main>
 
-  <section class="info panel" id="info" aria-live="polite" hidden></section>
+  <section class="info" id="info" aria-live="polite" hidden></section>
 </div>
 
 <!--VIEWER_DATA-->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/STLLoader.js"></script>
+<!-- three.js r128, kept in viewer/vendor so the viewer needs no network: viewer_server.py
+     serves these paths, make_viewer.py puts the files inline in the static page -->
+<script src="vendor/three.min.js"></script>
+<script src="vendor/OrbitControls.js"></script>
+<script src="vendor/STLLoader.js"></script>
 <script>
 (function () {
   "use strict";
   const $ = id => document.getElementById(id);
   const statusEl = $("status");
   if (!window.THREE || !THREE.OrbitControls || !THREE.STLLoader) {
-    statusEl.textContent = "3D library failed to load. Reload.";
+    statusEl.textContent = "3D library missing. Serve this folder with viewer_server.py, or rebuild the page with make_viewer.py.";
     return;
   }
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -252,6 +319,7 @@ h1 { margin: 0; font-size: 16px; line-height: 20px; font-weight: 600; white-spac
   const fmt = (n, d = 1) => (Math.round(n * 10 ** d) / 10 ** d).toFixed(d).replace(/\.0+$/, "");
   const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const EYE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>';
+  const EYE_OFF = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.7 5.1A10.4 10.4 0 0 1 12 5c6.4 0 10 7 10 7a17.3 17.3 0 0 1-2.8 3.8M6.6 6.6C3.7 8.4 2 12 2 12s3.6 7 10 7a10.3 10.3 0 0 0 5.4-1.6M9.9 9.9a3 3 0 0 0 4.2 4.2M3 3l18 18"/></svg>';
 
   // ------------------------------------------------------------ scene
   const stage = $("stage");
@@ -282,13 +350,17 @@ h1 { margin: 0; font-size: 16px; line-height: 20px; font-weight: 600; white-spac
   const allMats = [];   // every part material, so clipping can be switched in one place
 
   // ------------------------------------------------------------ state
+  // the address keeps the mode and plate (#print/<plate id>), so a reload comes back to it
+  const [hashMode, hashPlate] = decodeURIComponent(location.hash.slice(1)).split("/");
   const state = {
-    mode: location.hash === "#print" ? "print" : "asm",
+    mode: hashMode === "print" ? "print" : "asm",
     explode: 0, selected: null, plate: null,
     split: false, axis: "x", cut: 0.5, flip: false,
-    measure: false, xray: false, overhangs: false,
+    measure: false, xray: false, overhangs: false, grid: true,
   };
+  try { state.grid = localStorage.getItem("viewer-grid") !== "0"; } catch (e) { /* storage blocked */ }
   let D = null;                   // data.json
+  let asmSize = null;             // the printed parts together, in the model's own axes
   const asmParts = [];            // {cfg, group, meshes, caps, mat, capMat, center, dir}
   const printParts = [];          // {cfg, group, meshes, caps, mat, capMat, geo, size, overhangArea}
 
@@ -300,7 +372,7 @@ h1 { margin: 0; font-size: 16px; line-height: 20px; font-weight: 600; white-spac
     .then(data => { D = data; init(); })
     .catch(err => {
       console.error(err);
-      statusEl.textContent = "data.json failed to load. Rebuild with tools/make_viewer.py.";
+      statusEl.textContent = "data.json failed to load. Rebuild with make_viewer.py.";
     });
 
   const loader = new THREE.STLLoader();
@@ -355,7 +427,8 @@ h1 { margin: 0; font-size: 16px; line-height: 20px; font-weight: 600; white-spac
   }
 
   function makeMaterial(color, opacity) {
-    const m = new THREE.MeshStandardMaterial({ color, roughness: 0.6, metalness: 0.02 });
+    // faces sit a hair back, so the edge lines drawn on them don't flicker
+    const m = new THREE.MeshStandardMaterial({ color, roughness: 0.6, metalness: 0.02, polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 1 });
     m.userData.baseOpacity = opacity == null ? 1 : opacity;
     m.userData.baseColor = new THREE.Color(color);
     m.userData.cfgOpacity = m.userData.baseOpacity;     // config values, for Reset
@@ -370,16 +443,26 @@ h1 { margin: 0; font-size: 16px; line-height: 20px; font-weight: 600; white-spac
     return m;
   }
 
-  // One part = a group of instance meshes, each with a back-face "cap" twin
-  // that fills the cut face when the split view is on.
+  // Crease lines (faces meeting at more than 30°), so flat-shaded parts keep
+  // their edges from every angle. One set per geometry, shared by its copies.
+  const edgeCache = new WeakMap();
+  function edgesOf(geo) {
+    if (!edgeCache.has(geo)) edgeCache.set(geo, new THREE.EdgesGeometry(geo, 30));
+    return edgeCache.get(geo);
+  }
+
+  // One part = a group of instance meshes, each with its edge lines and a
+  // back-face "cap" twin that fills the cut face when the split view is on.
   function buildPart(cfg, geo, parent, partColor) {
     const group = new THREE.Group();
     const mat = makeMaterial(partColor, cfg.opacity);
     const capMat = makeCapMaterial(partColor);
+    const edgeMat = new THREE.LineBasicMaterial({ transparent: true });
     const meshes = [], caps = [];
     instancesOf(cfg).forEach(inst => {
       const m = inst.color ? makeMaterial(inst.color, cfg.opacity) : mat;
       const mesh = new THREE.Mesh(geo, m);
+      mesh.add(new THREE.LineSegments(edgesOf(geo), edgeMat));
       const cap = new THREE.Mesh(geo, capMat);
       cap.visible = false;
       cap.renderOrder = -1;
@@ -391,12 +474,19 @@ h1 { margin: 0; font-size: 16px; line-height: 20px; font-weight: 600; white-spac
       meshes.push(mesh); caps.push(cap);
     });
     parent.add(group);
-    return { cfg, group, meshes, caps, mat, capMat, visible: !cfg.hidden };
+    return { cfg, group, meshes, caps, mat, capMat, edgeMat, visible: !cfg.hidden };
   }
 
   function init() {
     document.title = D.title || document.title;
     $("title").textContent = D.title || D.project;
+    const built = /^(\d{4})-(\d\d)-(\d\d)/.exec(D.built || "");
+    if (built) {
+      const stamp = $("stamp");
+      stamp.textContent = `Built ${+built[3]} ${"Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec".split(" ")[built[2] - 1]}`;
+      stamp.title = `data.json built ${D.built}`;
+      stamp.hidden = false;
+    }
     if ((D.up || "z") === "z") asmRoot.rotation.x = -Math.PI / 2;
 
     // assembly
@@ -409,6 +499,11 @@ h1 { margin: 0; font-size: 16px; line-height: 20px; font-weight: 600; white-spac
     const asmBox = new THREE.Box3();
     asmParts.filter(p => !p.cfg.context).forEach(p => asmBox.expandByObject(p.group));
     const asmCenter = asmRoot.worldToLocal(asmBox.getCenter(new THREE.Vector3()));
+    if (!asmBox.isEmpty()) {
+      const w = asmBox.getSize(new THREE.Vector3());
+      asmSize = (D.up || "z") === "z" ? new THREE.Vector3(w.x, w.z, w.y) : w;
+    }
+    buildFloor();
     const explodeMm = D.explode_mm || 100;
     asmParts.forEach(p => {
       if (p.cfg.explode) { p.dir = new THREE.Vector3().fromArray(p.cfg.explode); return; }
@@ -442,7 +537,7 @@ h1 { margin: 0; font-size: 16px; line-height: 20px; font-weight: 600; white-spac
     if (!plates.length && printParts.length) plates.push({ id: "plate", name: "Plate 1" });
     printParts.forEach(p => { if (!p.cfg.plate) p.cfg.plate = plates[0].id; });
     D.plates = plates;
-    state.plate = plates.length ? plates[0].id : null;
+    state.plate = plates.length ? (plates.find(pl => pl.id === hashPlate) || plates[0]).id : null;
     if (!printParts.length) { $("modePrint").disabled = true; state.mode = "asm"; }
     buildBed();
 
@@ -459,20 +554,59 @@ h1 { margin: 0; font-size: 16px; line-height: 20px; font-weight: 600; white-spac
     initDownloads();
   }
 
+  // ------------------------------------------------------------ floor grid
+  // Assembled view: a grid under the lowest part, so the model sits on
+  // something and its size can be read off. Squares are 10 mm (50 mm for a
+  // model wider than 600 mm), every fifth line is heavier, and the lines
+  // fall on the model's own coordinates.
+  let floor = null;
+  function buildFloor() {
+    const shown = asmParts.filter(p => !p.cfg.hidden);
+    const box = new THREE.Box3();
+    (shown.length ? shown : asmParts).forEach(p => box.expandByObject(p.group));
+    if (box.isEmpty()) return;
+    const span = Math.max(box.max.x - box.min.x, box.max.z - box.min.z);
+    const step = span > 600 ? 50 : 10, pad = Math.max(2 * step, span * 0.25);
+    const lo = v => Math.floor((v - pad) / step) * step, hi = v => Math.ceil((v + pad) / step) * step;
+    const x0 = lo(box.min.x), x1 = hi(box.max.x), z0 = lo(box.min.z), z1 = hi(box.max.z);
+    const minor = [], major = [];
+    const pick = v => Math.round(v / step) % 5 === 0 ? major : minor;
+    for (let x = x0; x <= x1; x += step) pick(x).push(x, 0, z0, x, 0, z1);
+    for (let z = z0; z <= z1; z += step) pick(z).push(x0, 0, z, x1, 0, z);
+    const lines = (pts, opacity) => new THREE.LineSegments(
+      new THREE.BufferGeometry().setAttribute("position", new THREE.Float32BufferAttribute(pts, 3)),
+      new THREE.LineBasicMaterial({ transparent: true, opacity, depthWrite: false }));
+    floor = new THREE.Group();
+    floor.add(lines(minor, 0.08), lines(major, 0.2));
+    floor.position.y = box.min.y;
+    scene.add(floor);
+    $("toolGrid").title = `Floor grid, ${step} mm squares (G)`;
+  }
+  function toggleGrid(on) {
+    state.grid = on == null ? !state.grid : on;
+    setPressed("toolGrid", state.grid);
+    if (floor) floor.visible = state.grid && state.mode === "asm";
+    try { localStorage.setItem("viewer-grid", state.grid ? "1" : "0"); } catch (e) { /* storage blocked */ }
+  }
+
   // ------------------------------------------------------------ print helpers
+  // config.json: "bed": [width, depth] in mm and "bed_color": the plate's colour
+  // (default: a 256 mm textured PEI sheet)
   const BED = () => D.bed || [256, 256];
-  const SLICER = () => D.slicer && D.slicer !== "slicer" ? D.slicer : "";
+  const BED_COLOR = () => /^#[0-9a-f]{6}$/i.test(D.bed_color || "") ? D.bed_color : "#ab8846";
   let bed = null;
   function buildBed() {
     const [bw, bd] = BED();
     bed = new THREE.Group();
     const plateMesh = new THREE.Mesh(new THREE.PlaneGeometry(bw, bd), new THREE.MeshStandardMaterial({ map: peiTexture(), roughness: 0.85, metalness: 0.25 }));
     plateMesh.position.set(bw / 2, bd / 2, -0.05);
-    const grid = new THREE.GridHelper(Math.max(bw, bd), Math.max(bw, bd) / 10, 0x3b2c10, 0x3b2c10);
-    grid.material.transparent = true;
-    grid.material.opacity = 0.16;
-    grid.rotation.x = Math.PI / 2;
-    grid.position.set(bw / 2, bd / 2, 0);
+    // a line every 10 mm from the front-left corner, plus the plate's own edge
+    const pts = [];
+    for (let x = 0; x <= bw; x += 10) pts.push(x, 0, 0, x, bd, 0);
+    for (let y = 0; y <= bd; y += 10) pts.push(0, y, 0, bw, y, 0);
+    pts.push(bw, 0, 0, bw, bd, 0, 0, bd, 0, bw, bd, 0);
+    const grid = new THREE.LineSegments(new THREE.BufferGeometry().setAttribute("position", new THREE.Float32BufferAttribute(pts, 3)),
+      new THREE.LineBasicMaterial({ color: new THREE.Color(BED_COLOR()).multiplyScalar(0.3), transparent: true, opacity: 0.2 }));
     bed.add(plateMesh, grid);
     bed.userData = { plateMesh, grid };
     printRoot.add(bed);
@@ -483,9 +617,7 @@ h1 { margin: 0; font-size: 16px; line-height: 20px; font-weight: 600; white-spac
     const c = document.createElement("canvas");
     c.width = c.height = 512;
     const g = c.getContext("2d");
-    const grad = g.createLinearGradient(0, 0, 512, 512);
-    grad.addColorStop(0, "#b8944f"); grad.addColorStop(1, "#9d7b3d");
-    g.fillStyle = grad; g.fillRect(0, 0, 512, 512);
+    g.fillStyle = BED_COLOR(); g.fillRect(0, 0, 512, 512);   // flat, so the repeated tile shows no seams
     for (let i = 0; i < 26000; i++) {
       const v = Math.random();
       g.fillStyle = v < 0.5 ? `rgba(40,28,10,${0.12 + v * 0.3})` : `rgba(255,236,190,${(v - 0.5) * 0.35})`;
@@ -551,7 +683,7 @@ h1 { margin: 0; font-size: 16px; line-height: 20px; font-weight: 600; white-spac
   function buildViewButtons() {
     const views = [["iso", "3/4"], ["front", "Front"], ["back", "Back"], ["left", "Left"], ["right", "Right"], ["top", "Top"], ["bottom", "Bottom"], ["fit", "Fit"]];
     $("views").innerHTML = views.map(([id, label], i) =>
-      `<button type="button" data-view="${id}" title="${id === "fit" ? "F" : i + 1}">${label}</button>`).join("");
+      `${id === "fit" ? '<span class="sep"></span>' : ""}<button type="button" data-view="${id}" title="${id === "fit" ? "Fit what's shown (F)" : `${label} view (${i + 1})`}">${label}</button>`).join("");
     $("views").addEventListener("click", e => {
       const b = e.target.closest("[data-view]");
       if (b) setView(b.dataset.view);
@@ -574,13 +706,18 @@ h1 { margin: 0; font-size: 16px; line-height: 20px; font-weight: 600; white-spac
     const c = p.cfg;
     const qty = c.qty != null ? `× ${esc(c.qty)}` : p.count > 1 ? `× ${p.count}` : "";
     return `<li class="row${c.context ? " ctx" : ""}${p.visible ? "" : " off"}${state.selected === p ? " sel" : ""}" data-list="${list}" data-id="${esc(c.id)}">
-      <button type="button" class="name" style="--sw:${partHex(p)}"><span class="sw"></span><span>${esc(c.name)}</span>${qty ? `<span class="qty">${qty}</span>` : ""}</button>
-      <button type="button" class="eye" aria-pressed="${p.visible}" aria-label="${p.visible ? "Hide" : "Show"} ${esc(c.name)}">${EYE}</button></li>`;
+      <button type="button" class="name" style="--sw:${partHex(p)}" title="${esc(c.name)}"><span class="sw"></span><span class="label">${esc(c.name)}</span>${qty ? `<span class="qty">${qty}</span>` : ""}</button>
+      <button type="button" class="eye" aria-pressed="${p.visible}" aria-label="${p.visible ? "Hide" : "Show"} ${esc(c.name)}" title="${p.visible ? "Hide" : "Show"}">${p.visible ? EYE : EYE_OFF}</button></li>`;
   }
 
   function renderLists() {
+    const onPlate = printParts.filter(p => p.cfg.plate === state.plate);
     $("asmParts").innerHTML = asmParts.map(p => partRow(p, "asm")).join("");
-    $("printParts").innerHTML = printParts.filter(p => p.cfg.plate === state.plate).map(p => partRow(p, "print")).join("");
+    $("printParts").innerHTML = onPlate.map(p => partRow(p, "print")).join("");
+    $("asmCount").textContent = asmParts.length;
+    $("plateCount").textContent = D.plates.length;
+    $("printCount").textContent = onPlate.reduce((n, p) => n + p.count, 0);
+    document.querySelectorAll("[data-show-all]").forEach(b => { b.hidden = activeParts().every(p => p.visible); });
     document.querySelectorAll("#plateTabs [data-plate]").forEach(b => b.setAttribute("aria-selected", b.dataset.plate === state.plate));
   }
 
@@ -604,12 +741,20 @@ h1 { margin: 0; font-size: 16px; line-height: 20px; font-weight: 600; white-spac
     const el = $("info");
     const p = state.selected;
     const dl = rows => `<dl class="facts">${rows.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join("")}</dl>`;
+    const mm = s => `${fmt(s.x)} × ${fmt(s.y)} × ${fmt(s.z)} mm`;
     if (!p) {
+      // nothing selected: the plate, or the model as a whole
       if (state.mode === "print") {
         const pl = D.plates.find(x => x.id === state.plate);
-        el.innerHTML = pl ? `<h2>${esc(pl.name)}</h2>${pl.note ? `<p class="plate-note">${esc(pl.note)}</p>` : ""}` : "";
+        const on = printParts.filter(x => x.cfg.plate === state.plate);
+        const over = on.reduce((s, x) => s + x.overhangArea * x.count, 0);
+        const rows = on.length ? [["Parts", on.reduce((n, x) => n + x.count, 0)],
+          ["Tallest", `${fmt(Math.max(...on.map(x => x.size.z)))} mm`],
+          ["Overhangs", over > 5 ? `${fmt(over / 100)} cm²` : "None"]] : [];
+        el.innerHTML = pl ? `<h2>${esc(pl.name)}</h2>${pl.note ? `<p class="plate-note">${esc(pl.note)}</p>` : ""}${rows.length ? dl(rows) : ""}` : "";
       } else {
-        el.innerHTML = (D.facts || []).length ? dl(D.facts) : "";
+        const rows = (asmSize ? [["Overall", mm(asmSize)]] : []).concat(D.facts || []);
+        el.innerHTML = rows.length ? dl(rows) : "";
       }
       el.hidden = !el.innerHTML;
       $("app").classList.toggle("no-info", el.hidden);
@@ -618,10 +763,9 @@ h1 { margin: 0; font-size: 16px; line-height: 20px; font-weight: 600; white-spac
     const c = p.cfg;
     const size = state.mode === "print" ? p.size : partSize(p);
     const rows = [];
-    if (size) rows.push(["Size", `${fmt(size.x)} × ${fmt(size.y)} × ${fmt(size.z)} mm`]);
+    if (size) rows.push(["Size", mm(size)]);
     if (c.qty != null) rows.push(["Qty", c.qty]);
     if (c.material) rows.push(["Material", c.material]);
-    
     if (state.mode === "print") rows.push(["Overhangs", p.overhangArea > 5 ? `${fmt(p.overhangArea / 100)} cm²` : "None"]);
     (c.facts || []).forEach(f => rows.push(f));
     const tags = state.mode === "print" && c.settings
@@ -629,8 +773,8 @@ h1 { margin: 0; font-size: 16px; line-height: 20px; font-weight: 600; white-spac
     el.innerHTML = `<h2>${esc(c.name)}</h2>${dl(rows)}${tags}
       ${c.check ? `<div class="check"><b>Check</b>${esc(c.check)}</div>` : ""}
       <div class="acts">
-        <button type="button" class="link" id="zoomPart">Zoom</button>
-        <button type="button" class="link" id="isolatePart">Isolate</button>
+        <button type="button" class="btn" id="zoomPart">Zoom</button>
+        <button type="button" class="btn" id="isolatePart">Isolate</button>
       </div>
       <div class="look" data-scope="sel">${lookHtml([p], "Colour")}</div>`;
     el.hidden = false;
@@ -755,6 +899,13 @@ h1 { margin: 0; font-size: 16px; line-height: 20px; font-weight: 600; white-spac
       });
       p.capMat.clippingPlanes = clip;
       p.capMat.needsUpdate = true;
+      // edge lines: a darker shade of the filament (lighter on near-black parts), ghosted in X-ray
+      const base = p.mat.userData.baseColor, e = p.edgeMat;
+      if (base.r * 0.3 + base.g * 0.6 + base.b * 0.1 < 0.2) e.color.copy(base).lerp(new THREE.Color(0xffffff), 0.35);
+      else e.color.copy(base).multiplyScalar(p === sel ? 0.3 : 0.5);
+      e.opacity = (state.xray && p !== sel ? 0.4 : p === sel ? 1 : p.cfg.context ? 0.3 : 0.75) * Math.max(0.35, p.mat.userData.baseOpacity);
+      e.clippingPlanes = clip;
+      e.needsUpdate = true;
       const capsOn = state.split && !(state.xray && p !== sel) && p.mat.userData.baseOpacity >= 1;
       p.caps.forEach(c => { c.visible = capsOn; });
     });
@@ -785,10 +936,17 @@ h1 { margin: 0; font-size: 16px; line-height: 20px; font-weight: 600; white-spac
     $("asmSec").hidden = mode !== "asm";
     $("printSec").hidden = mode !== "print";
     $("explodeCtl").classList.toggle("off-mode", mode !== "asm");
+    $("toolGrid").classList.toggle("off-mode", mode !== "asm" || !floor);
+    toggleGrid(state.grid);
     clearMeasure();
     if (mode === "print") showPlate(instant);
-    else { applyVisibility(); setView("iso", instant); }
+    else { applyVisibility(); setView("iso", instant); syncHash(); }
     if (state.split) updateCut();
+  }
+
+  function syncHash() {
+    const hash = state.mode === "print" ? `#print/${encodeURIComponent(state.plate)}` : "";
+    try { history.replaceState(null, "", hash || location.pathname + location.search); } catch (e) { /* sandboxed page */ }
   }
 
   function showPlate(instant) {
@@ -804,6 +962,7 @@ h1 { margin: 0; font-size: 16px; line-height: 20px; font-weight: 600; white-spac
     updateDownloadButtons();
     if (state.split) updateCut();
     setView("iso", instant);
+    syncHash();
   }
 
   function updateOverhangNote() {
@@ -825,8 +984,16 @@ h1 { margin: 0; font-size: 16px; line-height: 20px; font-weight: 600; white-spac
     const dir = new THREE.Vector3(...DIRS[v === "fit" ? lastView : v]);
     if (v === "fit") dir.copy(camera.position).sub(controls.target);
     const objs = focusGroups();
-    if (state.mode === "print") objs.push(bed);
-    frame(objs.length ? objs : [activeRoot()], dir, instant);
+    // print: frame the parts, but never closer than a good piece of the bed,
+    // so a small part reads at a useful size and still sits on its plate
+    let minRadius = 0;
+    if (state.mode === "print") {
+      const bedR = Math.hypot(...BED()) / 2, box = visibleBox(objs);
+      const want = box.isEmpty() ? bedR : box.getBoundingSphere(new THREE.Sphere()).radius * 1.8;
+      if (want > bedR * 0.9) objs.push(bed);          // a full plate: show all of it
+      else minRadius = Math.max(want, bedR * 0.4);
+    }
+    frame(objs.length ? objs : [activeRoot()], dir, instant, minRadius);
   }
 
   function visibleBox(objs) {
@@ -845,11 +1012,12 @@ h1 { margin: 0; font-size: 16px; line-height: 20px; font-weight: 600; white-spac
     return box;
   }
 
-  function frame(objs, dir, instant) {
+  function frame(objs, dir, instant, minRadius) {
     const box = visibleBox(objs);
     if (box.isEmpty()) return;
     const c = box.getCenter(new THREE.Vector3());
     const sphere = box.getBoundingSphere(new THREE.Sphere());
+    sphere.radius = Math.max(sphere.radius, minRadius || 0);
     const d = (dir || camera.position.clone().sub(controls.target)).clone().normalize();
     const fov = THREE.MathUtils.degToRad(camera.fov);
     const fitH = sphere.radius / Math.sin(fov / 2);
@@ -1031,6 +1199,7 @@ h1 { margin: 0; font-size: 16px; line-height: 20px; font-weight: 600; white-spac
     state.split = on == null ? !state.split : on;
     setPressed("toolSplit", state.split);
     $("splitCtl").hidden = !state.split;
+    $("dock").classList.toggle("splitting", state.split);
     if (state.split) updateCut();
     applyMaterials();
   }
@@ -1051,11 +1220,12 @@ h1 { margin: 0; font-size: 16px; line-height: 20px; font-weight: 600; white-spac
     $("modePrint").onclick = () => setMode("print");
     $("asmParts").addEventListener("click", onListClick);
     $("printParts").addEventListener("click", onListClick);
-    $("showAll").onclick = () => { asmParts.forEach(p => { p.visible = true; }); applyVisibility(); };
+    document.querySelectorAll("[data-show-all]").forEach(b => { b.onclick = () => { activeParts().forEach(p => { p.visible = true; }); applyVisibility(); }; });
     $("explode").addEventListener("input", e => { state.explode = +e.target.value; applyExplode(); });
     $("toolSplit").onclick = () => toggleSplit();
     $("toolMeasure").onclick = () => toggleMeasure();
     $("toolXray").onclick = () => toggleXray();
+    $("toolGrid").onclick = () => toggleGrid();
     document.querySelectorAll("[data-axis]").forEach(b => b.addEventListener("click", () => {
       state.axis = b.dataset.axis;
       document.querySelectorAll("[data-axis]").forEach(x => x.setAttribute("aria-pressed", x === b));
@@ -1064,9 +1234,9 @@ h1 { margin: 0; font-size: 16px; line-height: 20px; font-weight: 600; white-spac
     $("cut").addEventListener("input", e => { state.cut = +e.target.value / 1000; updateCut(); });
     $("flipCut").onclick = () => { state.flip = !state.flip; updateCut(); };
     $("overhangs").addEventListener("change", e => { state.overhangs = e.target.checked; applyMaterials(); updateOverhangNote(); });
-    $("bambuPlate").onclick = () => downloadPlate();
-    $("bambuAll").onclick = () => downloadAll();
-    $("askClaude").onclick = copyClaudeRequest;
+    $("sendPlate").onclick = () => downloadPlate();
+    $("saveAll").onclick = () => downloadAll();
+    $("loadRequest").onclick = copyLoadRequest;
     ["info", "lookAll"].forEach(id => ["click", "input"].forEach(ev => $(id).addEventListener(ev, onLook)));
     controls.addEventListener("start", () => { tween = null; });
 
@@ -1081,6 +1251,7 @@ h1 { margin: 0; font-size: 16px; line-height: 20px; font-weight: 600; white-spac
       else if (k === "s") toggleSplit();
       else if (k === "m") toggleMeasure();
       else if (k === "x") toggleXray();
+      else if (k === "g" && state.mode === "asm") toggleGrid();
       else if (k === "+" || k === "=") zoomBy(-0.1, 0, 0);
       else if (k === "-" || k === "_") zoomBy(0.1, 0, 0);
       else if (k === "escape") { if (state.measure && mPts.length) clearMeasure(); else if (state.measure) toggleMeasure(false); else select(null); }
@@ -1090,25 +1261,29 @@ h1 { margin: 0; font-size: 16px; line-height: 20px; font-weight: 600; white-spac
   }
 
   // ------------------------------------------------------------ files
-  // Inside claude.ai the page can only hand files over through the downloads
-  // capability, which takes .zip but not .3mf or .stl. Served locally by
-  // viewer_server.py, Open in <slicer> hands the plate to that helper,
-  // which runs the slicer.open_command from print-kit.json. Otherwise (a plain file
-  // server, or straight from disk) a normal browser download is used.
+  // The plate button does the most the page's host allows. Served locally by
+  // viewer_server.py it hands the plate to that helper, which opens it
+  // in the slicer the helper found (a new window). Inside claude.ai files can
+  // only leave through the downloads capability, which takes .zip but not
+  // .3mf or .stl. Anywhere else (a plain file server, or straight from disk)
+  // it is a normal browser download.
   const inClaude = !!(window.claude && typeof window.claude.use === "function");
   let downloads = null;
   let downloadsReady = !inClaude;
-  let bambuHelper = false;
+  let slicer = null;                    // the helper's slicer name, when it has one
   function initDownloads() {
     if (inClaude) {
       window.claude.use("downloads").then(d => { downloads = d; downloadsReady = true; updateDownloadButtons(); })
         .catch(() => { downloadsReady = true; updateDownloadButtons(); });
     } else if (location.protocol.startsWith("http")) {
-      fetch("api/bambu").then(r => r.ok ? r.json() : null)
+      fetch("api/slicer").then(r => r.ok ? r.json() : null)
         .then(j => {
-          bambuHelper = !!(j && j.bambu); updateDownloadButtons();
+          if (!j) return;
+          slicer = j.slicer || null;
+          $("loadRequest").hidden = !j.loadRequest;
+          updateDownloadButtons();
           // keeps viewer_server.py alive while this tab is open; it exits once every tab is closed
-          if (bambuHelper) setInterval(() => fetch("api/bambu").catch(() => {}), 60000);
+          setInterval(() => fetch("api/slicer").catch(() => {}), 60000);
         }).catch(() => {});
     }
     updateDownloadButtons();
@@ -1116,10 +1291,10 @@ h1 { margin: 0; font-size: 16px; line-height: 20px; font-weight: 600; white-spac
   function canSave() { return !inClaude || !!downloads; }
   function updateDownloadButtons() {
     const ok = downloadsReady && canSave() && printParts.length > 0;
-    $("bambuPlate").disabled = !ok;
-    $("bambuAll").disabled = !ok;
-    $("slicerLabel").textContent = SLICER() && (bambuHelper || inClaude || location.protocol === "file:") ? `Open in ${SLICER()}` : "Save plate";
-    $("bambuHint").textContent = !downloadsReady ? "" : !canSave() ? "unavailable here" : inClaude ? ".3mf in .zip" : bambuHelper ? "" : ".3mf";
+    $("sendPlate").disabled = !ok;
+    $("saveAll").disabled = !ok;
+    $("sendLabel").textContent = slicer ? `Open in ${slicer}` : "Download plate";
+    $("sendHint").textContent = !downloadsReady || slicer ? "" : !canSave() ? "unavailable here" : inClaude ? ".3mf in .zip" : ".3mf";
   }
 
   const slug = s => String(s).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
@@ -1187,16 +1362,16 @@ h1 { margin: 0; font-size: 16px; line-height: 20px; font-weight: 600; white-spac
   async function downloadPlate() {
     const pl = D.plates.find(x => x.id === state.plate);
     const base = `${D.project}-${slug(pl.name)}`;
-    await withBusy("bambuPlate", async () => {
+    await withBusy("sendPlate", async () => {
       const mf = await threeMf(state.plate, true);
-      if (bambuHelper) await openInBambu(`${base}.3mf`, mf);
+      if (slicer) await openInSlicer(`${base}.3mf`, mf);
       else if (inClaude) await save(`${base}.zip`, await zip([{ name: `${base}.3mf`, data: new Uint8Array(await mf.arrayBuffer()) }]));
       else await save(`${base}.3mf`, mf);
     });
   }
 
   async function downloadAll() {
-    await withBusy("bambuAll", async () => {
+    await withBusy("saveAll", async () => {
       const files = [];
       for (const pl of D.plates) {
         const mf = await threeMf(pl.id);
@@ -1216,7 +1391,7 @@ h1 { margin: 0; font-size: 16px; line-height: 20px; font-weight: 600; white-spac
       console.error(err);
       note.textContent = err && err.code === "declined" ? "Cancelled"
         : err && err.code === "rate_limited" ? "Another download is pending"
-        : bambuHelper ? `${SLICER() || "Slicer"} didn't open (${err.message})`
+        : slicer ? `${slicer} didn't open (${err.message})`
         : "Can't save files here";
       b.disabled = false;
       return;
@@ -1224,8 +1399,8 @@ h1 { margin: 0; font-size: 16px; line-height: 20px; font-weight: 600; white-spac
     b.disabled = false;
   }
 
-  async function openInBambu(filename, blob) {
-    const r = await fetch("api/bambu", { method: "POST", headers: { "X-Filename": filename }, body: blob });
+  async function openInSlicer(filename, blob) {
+    const r = await fetch("api/slicer", { method: "POST", headers: { "X-Filename": filename }, body: blob });
     const j = await r.json().catch(() => ({}));
     if (!r.ok) throw new Error(j.error || r.status);
     $("dlNote").textContent = `Opened ${filename}`;
@@ -1245,11 +1420,11 @@ h1 { margin: 0; font-size: 16px; line-height: 20px; font-weight: 600; white-spac
     }
   }
 
-  function copyClaudeRequest() {
+  function copyLoadRequest() {
     const pl = D.plates.find(x => x.id === state.plate) || {};
     const parts = printParts.filter(p => p.cfg.plate === state.plate && p.visible);
     const lines = parts.map(p => `- ${p.cfg.name}${p.count > 1 ? ` × ${p.count}` : ""}${p.cfg.material ? `, ${p.cfg.material}` : ""}${p.cfg.settings ? `: ${p.cfg.settings}` : ""}`);
-    const text = `Load the "${pl.name}" plate of ${D.project} into ${SLICER() || "the slicer"}, arrange it, and check the settings:\n${lines.join("\n")}`;
+    const text = `Load the "${pl.name}" plate of ${D.project} into ${slicer || (D.slicer && D.slicer !== "slicer" ? D.slicer : "the slicer")}, arrange it, and check the settings:\n${lines.join("\n")}`;
     const note = $("dlNote");
     const done = () => { note.textContent = "Copied"; };
     try {
@@ -1297,6 +1472,7 @@ h1 { margin: 0; font-size: 16px; line-height: 20px; font-weight: 600; white-spac
 
   // ------------------------------------------------------------ theme + loop
   function applyTheme() {
+    if (floor) floor.children.forEach(l => l.material.color.set(css("--ink")));
     updateMeasureVisual();
   }
   window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", applyTheme);

@@ -51,6 +51,7 @@ Coordinates are the model's own millimetres, as in the `.scad` file.
   "up": "y",                     // which model axis points up when assembled: "z" (default) or "y"
   "explode_mm": 120,             // default pull-apart distance when a part has no "explode"
   "print_color": "#1d8a93",      // default colour for print parts
+  "bed_color": "#ab8846",        // optional: build plate colour (default textured-PEI brass)
   "facts": [["Outside", "124.8 × 143.8 × 116.7 mm"]],   // shown when nothing is selected
   "assembly": [ /* parts as assembled */ ],
   "plates": [ { "id": "cover", "name": "Cover", "note": "0.4 nozzle. Front face down, no supports" } ],
@@ -100,9 +101,16 @@ that nozzle and don't carry to another.
   the part's card, or "All parts" in the parts panel; Reset returns to the config. View-only.
 - The viewer lays each plate out on the bed and warns when parts overrun it.
 - Overhangs: faces pointing down past 45° and above the bed, shown red, with the area in cm².
-- Slicer button: local helper with an `open_command` → opens the slicer; otherwise saves the `.3mf`.
+- Slicer button: served by the helper it reads "Open in <slicer>" and opens the plate there. The
+  slicer is `VIEWER_SLICER` (`bambu`, `orca`, `prusa`, `cura`, `none`, or a command), else the
+  profile's `slicer.open_command`, else the first of those four found installed. With none, or from
+  disk, it reads "Download plate" and saves the `.3mf`.
   In claude.ai the downloads capability only accepts `.zip`, so it saves the `.3mf` inside a `.zip`.
-- "Copy load request for Claude" copies a prompt for loading that plate into the slicer with its settings.
+- "Copy load request" copies a prompt for loading that plate into the slicer with its settings. Hidden
+  unless the server runs with `VIEWER_LOAD_REQUEST=1`.
+- Assembled view: floor grid (G, 10 mm squares), crease lines on parts, an "Overall" size row. The
+  address keeps the mode and plate (`#print/<plate id>`).
+- three.js is bundled in `T/viewer/vendor/`, so the viewer needs no network, served or from disk.
 
 ## Slicer settings in a 3MF (Bambu Studio / OrcaSlicer)
 

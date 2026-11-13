@@ -1,5 +1,19 @@
 # Changelog
 
+## 2026-11-13
+- Viewer: the redesign from 3d-printz ported in. Open side columns around a framed stage, crease lines
+  on parts, floor grid in the assembled view (G), flat bed in `bed_color` with an exact 10 mm grid,
+  whole-bed framing for big plates, Show all in both modes, phone and tablet layouts, mode and plate
+  kept in the address.
+- Viewer: three.js r128 bundled in `tools/viewer/vendor/` (MIT) instead of a CDN; `make_viewer.py`
+  inlines it into the static page, so viewers work offline.
+- `viewer_server.py`: `/api/slicer` replaces `/api/bambu`. Slicer from `VIEWER_SLICER`, else the
+  profile's `slicer.open_command`, else Bambu Studio, OrcaSlicer, PrusaSlicer or Cura if installed.
+  Non-macOS slicers start detached, so the request no longer waits for the slicer to quit. "Copy load
+  request" is hidden unless `VIEWER_LOAD_REQUEST=1`.
+- README: install is one numbered guide per system, folded by default; a 3D viewer section with a
+  screenshot.
+
 ## 2026-11-12
 - Windows and Ubuntu support, tested in CI (`.github/workflows/platforms.yml`: fresh macOS, Windows/Git Bash
   and Ubuntu runners install OpenSCAD, check and view `tests/sample/coaster`, run the session hook).
