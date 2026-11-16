@@ -20,7 +20,7 @@ lookup order live in `${CLAUDE_PLUGIN_ROOT}/tools/kit_profile.py`; the template 
 If a profile already exists (`python3 ${CLAUDE_PLUGIN_ROOT}/tools/kit_profile.py --where`), read it
 and change only what the user asks.
 
-## 2. Ask (one short round, AskUserQuestion when available)
+## 2. Detect, then ask one plain question
 
 Ask only what you can't find out. Detect first with one command (it finds a working Python on
 macOS, Linux and Windows/Git Bash, where `python3` often isn't one):
@@ -38,7 +38,7 @@ sh ${CLAUDE_PLUGIN_ROOT}/scripts/py.sh ${CLAUDE_PLUGIN_ROOT}/tools/doctor.py --j
   - Ubuntu/Debian: it's almost always there; if not, the user runs `sudo apt install -y python3`
     in a terminal (you can't answer sudo's password prompt).
 - **OpenSCAD missing:** say so in one line with the `openscad.install.describe` text it reports,
-  and ask once (in the question round below) whether to install it. On yes, run
+  and ask in the same message as the printer question whether to install it. On yes, run
   `sh ${CLAUDE_PLUGIN_ROOT}/scripts/py.sh ${CLAUDE_PLUGIN_ROOT}/tools/doctor.py --install`.
   It needs no admin rights: Homebrew on a Mac that has it, otherwise the official snapshot from
   files.openscad.org (about 80-100 MB, SHA-256 checked) into a per-user folder. The download
@@ -49,24 +49,36 @@ sh ${CLAUDE_PLUGIN_ROOT}/scripts/py.sh ${CLAUDE_PLUGIN_ROOT}/tools/doctor.py --j
   exact `sudo apt-get install` line. Give the user that line to run in a terminal, then rerun
   `--install` (`openscad.missing_libs` in the JSON lists what's missing).
   `install` is null: point to https://openscad.org/downloads.html. Don't stop setup for it.
-- **Slicers:** use the detected ones to preselect the slicer question and fill `open_command`.
+- **Slicers:** use the detected one as the default slicer and fill `open_command`. Several found:
+  name them in your question and let the user say which.
   None found: the viewer saves `.3mf` files instead; don't install one.
 - **Portless** present: offer `server.launcher = "portless"`. Absent: leave `"plain"`, don't mention it.
 - Use the reported `python.path` and `openscad.path` for the rest of setup. When OpenSCAD isn't
   on PATH (`on_path` false), commands in the skills that say `openscad` mean that path; new
   sessions are told so automatically.
 
-Then ask:
+Then ask in one plain chat message. Do not use AskUserQuestion here, and never list printer
+models to pick from: there are hundreds of printers, plates and materials, and a short menu of
+guesses steers people toward the ones listed. Having a slicer installed says nothing certain
+about the printer.
 
-1. **Printer**: model, bed size X × Y × Z mm (look it up from the model and confirm), nozzle they
-   use for real parts, other nozzles they own, build plate.
-2. **Slicer**: which one, and the process preset names they use (default, and Gridfinity if they make bins).
-3. **Materials**: default and others they own.
-4. **Rules** (all on by default; show them as a list to switch off): ask before any print, open the
-   slicer only when asked, Gridfinity outline-first gate, offer fit tests first, commit after changes.
-5. **Taste** (optional): anything they always or never want in a design. Leave empty for the
-   default taste list in the `scad-design` skill.
-6. Their name and whether they like short or detailed replies (optional).
+Only the printer is required. Everything else has a default the user can change in the same
+reply. Ask something like:
+
+> What printer do you have?
+> I'll assume a 0.4 mm nozzle, PLA, <detected slicer, or "no slicer found, so plates are saved
+> as files"> and all the house rules on. Tell me anything that's different.
+
+Then:
+
+1. Look up the bed size X × Y × Z mm from the model. Unknown, modified or home-built: ask for it.
+2. Show what you'll write as one short list: printer and bed size, nozzle, plate (blank if they
+   didn't say), slicer, materials, and the rules by name (ask before any print, open the slicer
+   only when asked, Gridfinity outline-first gate, offer fit tests first, commit after changes).
+   Ask "Write this?" in plain text and change whatever they correct.
+3. Don't ask about other nozzles, slicer preset names, taste, their name or reply style. Fill in
+   what they volunteered, leave the rest at the defaults, and say in one line that running
+   setup again changes any of it.
 
 ## 3. Slicer open command
 

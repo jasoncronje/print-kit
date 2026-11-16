@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-11-16
+- Setup: asks one plain question ("What printer do you have?") with stated defaults, then shows
+  the profile and asks before writing. It no longer uses multiple-choice menus or offers printer
+  models to pick from: a first run listed only Bambu printers because Bambu Studio was installed.
+
 ## 2026-11-13
 - Tests: `tests/editors_test.py` and a sample `bit-bin` build the photo-trace and layout editors,
   serve them, save through the server and rebuild from the saved trace. Runs in CI on all three
