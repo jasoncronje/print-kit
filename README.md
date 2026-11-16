@@ -233,16 +233,16 @@ my-prints/
 
 Planned, roughly in this order. Nothing here has a date.
 
-- **A Gridfinity command.** One guided flow from "I want a bin for this tool" to a printed bin:
-  photo, outline, pocket, grid size.
-- **More slicers proven.** The slicer button is tested with Bambu Studio on macOS. OrcaSlicer,
-  PrusaSlicer and Cura, and Windows and Linux, are next.
-- **Calibration per material and nozzle.** Today's calibration print covers one nozzle and one
-  filament at a time. Keeping a set for PETG, TPU and a second nozzle side by side comes next.
-- **Remixing downloaded models.** Better tools for changing an STL or STEP file you didn't
-  design: resize a hole, add a mount, split it for your bed.
-- **A home page for your projects.** One page listing every project with its picture and viewer.
-- **A short demo video.**
+- [ ] **A Gridfinity command.** One guided flow from "I want a bin for this tool" to a printed bin:
+      photo, outline, pocket, grid size.
+- [ ] **More slicers proven.** The slicer button is tested with Bambu Studio on macOS. OrcaSlicer,
+      PrusaSlicer and Cura, and Windows and Linux, are next.
+- [ ] **Calibration per material and nozzle.** Today's calibration print covers one nozzle and one
+      filament at a time. Keeping a set for PETG, TPU and a second nozzle side by side comes next.
+- [ ] **Remixing downloaded models.** Better tools for changing an STL or STEP file you didn't
+      design: resize a hole, add a mount, split it for your bed.
+- [ ] **A home page for your projects.** One page listing every project with its picture and viewer.
+- [ ] **A short demo video.**
 
 Want something else? [Suggest it](https://github.com/jasoncronje/print-kit/issues/new/choose).
 
