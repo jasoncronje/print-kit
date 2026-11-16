@@ -1,6 +1,11 @@
 # Changelog
 
 ## 2026-11-16
+- Setup: strictly one question per message (bed size, nozzle and build plate are each their own),
+  no fixed count, follow-ups allowed. Asks for filament brands (new `materials.brands`). The
+  house-rules question is gone: the rules stay on unless the user asks.
+- Profile template: the example Bambu P2S, Bambu Studio and PETG values are replaced with blanks,
+  so setup can't carry one person's printer into another's profile.
 - Setup: now six short questions, one per message (printer, nozzle and plate, slicer, materials,
   viewer address, house rules), each with a stated default. Portless is explained with a
   before and after address and is never switched on without asking; setup offers to install it.

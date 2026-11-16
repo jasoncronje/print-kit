@@ -147,7 +147,10 @@ def label_of(defines):
 def project_jobs(project, only, fn, strict):
     cfg_path = project / "viewer" / "config.json"
     cfg = json.loads(cfg_path.read_text(encoding="utf-8")) if cfg_path.exists() else {}
-    scad = project / cfg["scad"] if cfg.get("scad") else sorted(project.glob("*.scad"))[0]
+    found = sorted(project.glob("*.scad"))
+    if not cfg.get("scad") and not found:
+        sys.exit(f"check_scad: no .scad file in {project}")
+    scad = project / cfg["scad"] if cfg.get("scad") else found[0]
     parts, readme = part_list(scad.read_text(encoding="utf-8")), readme_defines(project)
     fn = fn if fn is not None else cfg.get("fn")
 

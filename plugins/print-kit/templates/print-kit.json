@@ -2,18 +2,18 @@
   "version": 1,
   "user": { "name": "", "reply_style": "short" },
   "printer": {
-    "name": "Bambu Lab P2S",
-    "bed_mm": [256, 256, 256],
+    "name": "",
+    "bed_mm": [0, 0, 0],
     "nozzle_mm": 0.4,
     "other_nozzles_mm": [],
-    "plate": "Textured PEI"
+    "plate": ""
   },
   "slicer": {
-    "name": "Bambu Studio",
-    "open_command": ["open", "-n", "-a", "BambuStudio", "--args", "{file}"],
-    "presets": { "default": "0.20mm Standard @BBL P2S" }
+    "name": "",
+    "open_command": [],
+    "presets": {}
   },
-  "materials": { "default": "PLA", "owned": ["PLA", "PETG"] },
+  "materials": { "default": "PLA", "owned": ["PLA"], "brands": [] },
   "server": { "launcher": "plain" },
   "rules": {
     "ask_before_print": true,

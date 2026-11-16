@@ -31,7 +31,8 @@ def profile_summary(p):
         + (f", plate {pr['plate']}" if pr["plate"] else ""),
         f"- Slicer: {sl['name'] or '(not set)'}" + (f"; presets {json.dumps(sl['presets'])}" if sl["presets"] else "")
         + ("" if sl["open_command"] else "; no open_command, so the viewer saves the .3mf instead"),
-        f"- Materials: default {p['materials']['default']}, owned {', '.join(p['materials']['owned'])}",
+        f"- Materials: default {p['materials']['default']}, owned {', '.join(p['materials']['owned'])}"
+        + (f"; brands {', '.join(p['materials']['brands'])}" if p["materials"].get("brands") else ""),
         f"- Data folder: {p['data_dir']}; pages served with launcher '{p['server']['launcher']}'",
         "- Rules: " + ", ".join(f"{k}={v}" for k, v in rules.items()),
         machine(),

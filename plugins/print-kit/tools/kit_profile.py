@@ -46,7 +46,7 @@ DEFAULTS = {
         "open_command": [],          # e.g. ["open", "-n", "-a", "BambuStudio", "--args", "{file}"]
         "presets": {},               # e.g. {"default": "0.20mm Standard", "gridfinity": "..."}
     },
-    "materials": {"default": "PLA", "owned": ["PLA"]},
+    "materials": {"default": "PLA", "owned": ["PLA"], "brands": []},
     "server": {"launcher": "plain"},  # "portless" when https://<name>.localhost URLs are wanted
     "rules": {
         "ask_before_print": True,
@@ -114,7 +114,8 @@ def bed(start=None):
 def require_bed(start=None):
     """Stop unless a profile sets the bed size: a guessed bed passes parts that don't fit the real one."""
     path = find(start)
-    if path and (json.loads(path.read_text(encoding="utf-8")).get("printer") or {}).get("bed_mm"):
+    size = (json.loads(path.read_text(encoding="utf-8")).get("printer") or {}).get("bed_mm") if path else None
+    if size and all(isinstance(v, (int, float)) and v > 0 for v in size):
         return
     where = f"{path} has no printer.bed_mm" if path else f"no {NAME} here, above, or in {USER_FILE.parent}"
     sys.exit(f"print-kit: {where}, so the bed size is unknown.\n"

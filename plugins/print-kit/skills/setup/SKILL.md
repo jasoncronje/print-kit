@@ -20,7 +20,7 @@ lookup order live in `${CLAUDE_PLUGIN_ROOT}/tools/kit_profile.py`; the template 
 If a profile already exists (`python3 ${CLAUDE_PLUGIN_ROOT}/tools/kit_profile.py --where`), read it
 and change only what the user asks.
 
-## 2. Detect, then ask step by step
+## 2. Detect, then ask one thing at a time
 
 Ask only what you can't find out. Detect first with one command (it finds a working Python on
 macOS, Linux and Windows/Git Bash, where `python3` often isn't one):
@@ -52,53 +52,70 @@ sh ${CLAUDE_PLUGIN_ROOT}/scripts/py.sh ${CLAUDE_PLUGIN_ROOT}/tools/doctor.py --j
 - **Slicers:** use the detected one as the default slicer and fill `open_command`. Several found:
   name them in your question and let the user say which.
   None found: the viewer saves `.3mf` files instead; don't install one.
-- **Portless** (`portless` true or false): never switch it on silently. Ask about it in step 5 below.
+- **Portless** (`portless` true or false): never switch it on silently. Ask about it as described below.
 - Use the reported `python.path` and `openscad.path` for the rest of setup. When OpenSCAD isn't
   on PATH (`on_path` false), commands in the skills that say `openscad` mean that path; new
   sessions are told so automatically.
 
-Then ask in plain chat, one short question per message, and wait for each answer. Do not use
-AskUserQuestion, and never list printer models to pick from: there are hundreds of printers,
-plates and materials, and a short menu of guesses steers people toward the ones listed. Having
-a slicer installed says nothing certain about the printer.
+Then ask in plain chat: **one question per message, about one thing**, and wait for the
+answer. Never put two questions in one message ("which nozzle, and which plate?" is two). Do
+not use AskUserQuestion, and never list printer models to pick from: there are hundreds of
+printers, plates and materials, and a short menu of guesses steers people toward the ones
+listed. Having a slicer installed says nothing certain about the printer.
 
-Start by saying in one line what you found (OpenSCAD, slicer) and that there are six quick
-questions. Number each one ("2 of 6"). Every question after the first states its default, so
-"yes" or "ok" accepts it. Take in anything they volunteer early and skip the questions it
-already answers.
+Start by saying in one line what you found (OpenSCAD, slicer) and that a few short questions
+follow. Don't number the questions or promise a count: the list below is what the profile
+needs, not a script. Skip anything they already told you, and add a follow-up whenever an
+answer is unclear or opens something the profile should record. Where there's a sensible
+default, state it, so "yes" or "ok" accepts it.
 
-1. **Printer.** "What printer do you have?" Look up its bed size X × Y × Z mm and say it back in
-   your next message ("Bed 250 × 210 × 220 mm, right?" can share a message with question 2).
-   Unknown, modified or home-built: ask for the size.
-2. **Nozzle and plate.** "Which nozzle do you print with? I'll assume 0.4 mm. And which build
-   plate, if you want it noted?" Other nozzles they mention go in `other_nozzles_mm`.
-3. **Slicer.** One found: "I found <slicer>. Use it for the viewer's Open button?" Several
-   found: name them and ask which. None: say plates will be saved as files, and ask which
-   slicer they use so it's noted.
-4. **Materials.** "Which filaments do you have? I'll assume PLA only." The first is the default.
-5. **Viewer address (Portless).** Explain it in plain words, with both addresses, then ask:
+What to find out, in this order:
 
-   > The 3D viewer opens in your browser from a small server on your own computer. Normally
-   > its address is a number that changes every time:
-   > `http://127.0.0.1:53817`
-   > Portless is a free, optional tool that gives it a steady, named address instead:
-   > `https://coaster-viewer.localhost`
-   > Both show the same page, and neither is reachable from outside your computer.
+- **Printer.** "What printer do you have?"
+- **Bed size.** Look it up from the model and confirm it on its own: "Its bed is
+  250 × 210 × 220 mm. Is that right?" Unknown, modified or home-built: ask for X × Y × Z.
+- **Nozzle.** "Which nozzle size do you print with? I'll assume 0.4 mm." Other nozzles they
+  mention go in `other_nozzles_mm`.
+- **Build plate.** "Which build plate do you print on?" Ask it by itself, every time they
+  haven't said. More than one: ask which they use most; that one goes in `printer.plate`,
+  the others in `notes`.
+- **Slicer.** One found: "I found <slicer>. Should the viewer's Open button use it?" Several
+  found: name them and ask which. None: say plates will be saved as files, and ask which
+  slicer they use so it's noted.
+- **Filament types.** "Which filament types do you have? I'll assume PLA only." The first is
+  the default.
+- **Filament brands.** "Which brands are they: your printer maker's own, or others? Name them
+  if you like." Goes in `materials.brands`. It matters because slicer presets are per brand
+  (a maker's own spool has a tuned preset; other brands start from a generic one).
+- **Viewer address (Portless).** Explain it in plain words, with both addresses on their own
+  lines, then ask one question:
 
-   - Portless found: "You already have Portless. Use it?" Default yes.
-   - Not found: "Want me to install it, or keep the plain address?" Default: keep the plain
-     address. On yes, run `npm install -g portless`; without `npm`, say it needs Node.js and
-     keep `"plain"`. Say that its first run may ask for their computer password once, to trust
-     its local certificate.
+  > The 3D viewer opens in your browser from a small server on your own computer. Normally
+  > its address is a number that changes every time:
+  >
+  > `http://127.0.0.1:53817`
+  >
+  > Portless is a free, optional tool that gives it a steady, named address instead:
+  >
+  > `https://coaster-viewer.localhost`
+  >
+  > Both show the same page, and neither is reachable from outside your computer.
 
-   Yes sets `server.launcher` to `"portless"`; anything else leaves `"plain"`.
-6. **House rules.** List them by name, one line each, all on: ask before any print, open the
-   slicer only when asked, Gridfinity outline-first gate, offer fit tests first, commit after
-   changes. "Switch any off?"
+  - Portless found: "You already have Portless. Use it?" Default yes.
+  - Not found: "Want me to install it, or keep the plain address?" Default: keep the plain
+    address. On yes, run `npm install -g portless`; without `npm`, say it needs Node.js and
+    keep `"plain"`. Say that its first run may ask for their computer password once, to trust
+    its local certificate.
+
+  Yes sets `server.launcher` to `"portless"`; anything else leaves `"plain"`.
+
+Don't ask about the house rules: they are what print-kit is for, so all stay on
+(`commit_after_changes` only acts in a git repo anyway). If the user asks to switch one off,
+do it. Don't ask about slicer preset names, taste, their name or reply style either: fill in
+what they volunteered.
 
 Then show what you'll write as one short list and ask "Write this?" Change whatever they
-correct. Don't ask about slicer preset names, taste, their name or reply style: fill in what
-they volunteered, and say in one line that running setup again changes any of it.
+correct, and say in one line that running setup again changes any of it.
 
 ## 3. Slicer open command
 
