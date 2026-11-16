@@ -1,6 +1,11 @@
 # Changelog
 
 ## 2026-11-16
+- Install is one prompt to paste into Claude Code. It points at the new `INSTALL.md`, which tells
+  the agent to add the plugin, then follow the setup guide from disk in the same session (skills
+  only load after a restart). The three per-system guides became one collapsed "Install by hand".
+- README: after-install help (troubleshooting, changing the profile, update, remove, Portless,
+  what goes online) moved under its own "After install" section below a separator.
 - Setup ends with three example requests, so a new user knows what to type next.
 - README: how to update and remove, and what print-kit writes to disk.
 - GitHub issue forms for bugs (asks for doctor output, system, printer, slicer) and ideas.

@@ -27,148 +27,76 @@ Stands, docks, enclosures, mounts, Gridfinity bins and keyboard parts, all desig
 
 ## Install
 
-Pick your system. Each guide is the whole install, first step to first part.
+You need [Claude Code](https://claude.com/claude-code). On Windows, install
+[Git for Windows](https://git-scm.com/downloads/win) first: Claude Code needs its Bash.
+
+Open Claude Code in the folder you keep your prints in (any folder works) and paste this:
+
+```
+Install print-kit for me: read https://raw.githubusercontent.com/jasoncronje/print-kit/main/INSTALL.md and follow it.
+```
+
+Claude adds the plugin, installs Python and OpenSCAD if they're missing (no admin rights), asks
+about your printer one question at a time, and offers a small calibration print. When it's
+done, restart Claude Code and try:
+
+```
+Design a stand for my phone. Start with a fit test for the cradle.
+```
+
+```
+Show me the stand in the 3D viewer.
+```
+
+In the Claude Code desktop app the viewer opens beside the chat. In the terminal you get a link.
 
 <details>
-<summary><b>Install on macOS</b></summary>
+<summary><b>Install by hand</b></summary>
 
-1. Install [Claude Code](https://claude.com/claude-code) and open it.
+The same steps on macOS, Windows and Linux.
 
-2. Add the plugin. Type these two lines into Claude Code:
+1. Add the plugin. Type these two lines into Claude Code:
 
    ```
    /plugin marketplace add jasoncronje/print-kit
    /plugin install print-kit@print-kit
    ```
 
-3. Open the folder you keep your prints in (any folder, ideally a git repo) and run:
+2. Restart Claude Code in the folder you keep your prints in, and run:
 
    ```
    /print-kit:setup
    ```
 
-   Setup installs Python (via Homebrew or Apple's Command Line Tools) and OpenSCAD (Homebrew if you have
-   it, otherwise the official snapshot from openscad.org into your user folder), with no admin rights. Then it finds your slicer, asks about your printer, and
-   writes `print-kit.json` and a `data/` folder. A slicer is optional: without one, the viewer
-   saves the plate's `.3mf`.
+   Setup installs what's missing, with no admin rights:
 
-4. Start a new session (or `/clear`) and try:
+   - **Python**: Homebrew or Apple's Command Line Tools on macOS, `winget` on Windows. Ubuntu
+     already has it (`python3 --version`).
+   - **OpenSCAD**: Homebrew on a Mac that has it, otherwise the official snapshot from
+     openscad.org into your user folder. On Linux with a non-x86 CPU, install it with your
+     package manager first.
 
-   ```
-   Design a stand for my phone. Start with a fit test for the cradle.
-   ```
+   Then it finds your slicer, asks about your printer, and writes `print-kit.json` and a
+   `data/` folder. A slicer is optional: without one, the viewer saves the plate's `.3mf`.
 
-5. See it in 3D:
+3. Start a new session (or `/clear`) and ask for a part.
 
-   ```
-   Show me the stand in the 3D viewer.
-   ```
-
-   In the Claude Code desktop app it opens beside the chat. In the terminal you get a link.
-
-Rather install OpenSCAD yourself? Do it before step 3 and setup will use it:
+Rather install OpenSCAD yourself? Do it before step 2 and setup will use it:
 
 ```bash
-brew install --cask openscad@snapshot   # the stable cask is disabled
+brew install --cask openscad@snapshot   # macOS: the stable cask is disabled
+winget install OpenSCAD.OpenSCAD        # Windows
+sudo apt install openscad               # Debian/Ubuntu: older 2021 release, slower
 ```
 
 </details>
 
-<details>
-<summary><b>Install on Windows</b></summary>
+Every push is tested on fresh macOS, Windows and Ubuntu machines: OpenSCAD install, model checks,
+viewer build, the calibration piece, the trace and layout editors, and the session hook.
 
-1. Install [Git for Windows](https://git-scm.com/downloads/win). Claude Code needs its Bash.
+---
 
-2. Install [Claude Code](https://claude.com/claude-code) and open it.
-
-3. Add the plugin. Type these two lines into Claude Code:
-
-   ```
-   /plugin marketplace add jasoncronje/print-kit
-   /plugin install print-kit@print-kit
-   ```
-
-4. Open the folder you keep your prints in (any folder, ideally a git repo) and run:
-
-   ```
-   /print-kit:setup
-   ```
-
-   Setup installs Python (`winget`) and OpenSCAD (the official snapshot from openscad.org into your user
-   folder), with no admin rights. Then it finds your slicer, asks about your printer, and
-   writes `print-kit.json` and a `data/` folder. A slicer is optional: without one, the viewer
-   saves the plate's `.3mf`.
-
-5. Start a new session (or `/clear`) and try:
-
-   ```
-   Design a stand for my phone. Start with a fit test for the cradle.
-   ```
-
-6. See it in 3D:
-
-   ```
-   Show me the stand in the 3D viewer.
-   ```
-
-   In the Claude Code desktop app it opens beside the chat. In the terminal you get a link.
-
-Rather install OpenSCAD yourself? Do it before step 4 and setup will use it:
-
-```bash
-winget install OpenSCAD.OpenSCAD
-```
-
-</details>
-
-<details>
-<summary><b>Install on Ubuntu / Linux</b></summary>
-
-1. Check Python 3 is there: `python3 --version`. Ubuntu already has it.
-
-2. Install [Claude Code](https://claude.com/claude-code) and open it.
-
-3. Add the plugin. Type these two lines into Claude Code:
-
-   ```
-   /plugin marketplace add jasoncronje/print-kit
-   /plugin install print-kit@print-kit
-   ```
-
-4. Open the folder you keep your prints in (any folder, ideally a git repo) and run:
-
-   ```
-   /print-kit:setup
-   ```
-
-   Setup installs OpenSCAD on x86-64 (the official snapshot from openscad.org into your user folder; on
-   other CPUs, install it with your package manager first), with no admin rights. Then it finds your slicer, asks about your printer, and
-   writes `print-kit.json` and a `data/` folder. A slicer is optional: without one, the viewer
-   saves the plate's `.3mf`.
-
-5. Start a new session (or `/clear`) and try:
-
-   ```
-   Design a stand for my phone. Start with a fit test for the cradle.
-   ```
-
-6. See it in 3D:
-
-   ```
-   Show me the stand in the 3D viewer.
-   ```
-
-   In the Claude Code desktop app it opens beside the chat. In the terminal you get a link.
-
-Rather install OpenSCAD yourself? Do it before step 4 and setup will use it:
-
-```bash
-sudo apt install openscad   # Debian/Ubuntu: older 2021 release, slower
-```
-
-</details>
-
-Already installed? These are for later:
+## After install
 
 <details>
 <summary><b>Something isn't working</b></summary>
@@ -176,44 +104,34 @@ Already installed? These are for later:
 1. Ask Claude to "run the print-kit doctor". It lists what's installed and what's missing.
 2. If OpenSCAD is missing, get it from https://openscad.org/downloads.html.
 3. If OpenSCAD is installed but not found, set `"openscad": "/full/path/to/openscad"` in `print-kit.json`.
+4. Still stuck? [Open an issue](https://github.com/jasoncronje/print-kit/issues/new/choose) with the doctor's output.
+
+</details>
+
+<details>
+<summary><b>Change your printer, slicer or materials</b></summary>
+
+Run `/print-kit:setup` again and say what changed. To tune fits to your printer, say
+"calibrate my printer".
 
 </details>
 
 <details>
 <summary><b>Update print-kit</b></summary>
 
-1. In Claude Code, run:
-
-   ```
-   /plugin marketplace update print-kit
-   ```
-
-2. Restart Claude Code.
-
-</details>
-
-<details>
-<summary><b>Optional: named viewer addresses</b></summary>
-
-For `https://<name>.localhost` viewer URLs instead of a port number:
-
-Setup explains [Portless](https://github.com/vercel-labs/portless) and offers to install it. To add it later, run `/print-kit:setup` again, or install it yourself with `npm install -g portless`.
-
-</details>
-
-Every push is tested on fresh macOS, Windows and Ubuntu machines: OpenSCAD install, model checks,
-viewer build, the trace and layout editors, and the session hook.
-
-## Update and remove
-
-Update, in a terminal, then restart Claude Code:
+In a terminal, then restart Claude Code:
 
 ```
 claude plugin marketplace update print-kit
 claude plugin update print-kit@print-kit
 ```
 
-Remove:
+</details>
+
+<details>
+<summary><b>Remove print-kit</b></summary>
+
+In a terminal:
 
 ```
 claude plugin uninstall print-kit@print-kit
@@ -226,7 +144,27 @@ What print-kit puts on your computer, all of it yours to keep or delete:
 - One folder per project you design.
 - OpenSCAD, only if you let setup install it and Homebrew didn't: `~/Library/Application Support/print-kit` on macOS, `%LOCALAPPDATA%\print-kit` on Windows, `~/.local/share/print-kit` on Linux.
 
-Your models, measurements and profile stay on your computer. The viewer runs there too and can't be reached from outside it. Two things go online: the pages load their fonts from Google Fonts, and setup downloads OpenSCAD if you ask it to.
+</details>
+
+<details>
+<summary><b>Named viewer addresses (optional)</b></summary>
+
+For `https://<name>.localhost` viewer addresses instead of a port number, setup explains
+[Portless](https://github.com/vercel-labs/portless) and offers to install it. To add it later,
+run `/print-kit:setup` again, or install it yourself with `npm install -g portless`.
+
+</details>
+
+<details>
+<summary><b>What goes online</b></summary>
+
+Your models, measurements and profile stay on your computer. The viewer runs there too and
+can't be reached from outside it. Two things go online: the pages load their fonts from Google
+Fonts, and setup downloads OpenSCAD if you ask it to.
+
+</details>
+
+---
 
 ## The 3D viewer
 
