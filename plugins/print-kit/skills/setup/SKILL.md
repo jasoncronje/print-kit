@@ -20,7 +20,7 @@ lookup order live in `${CLAUDE_PLUGIN_ROOT}/tools/kit_profile.py`; the template 
 If a profile already exists (`python3 ${CLAUDE_PLUGIN_ROOT}/tools/kit_profile.py --where`), read it
 and change only what the user asks.
 
-## 2. Detect, then ask one plain question
+## 2. Detect, then ask step by step
 
 Ask only what you can't find out. Detect first with one command (it finds a working Python on
 macOS, Linux and Windows/Git Bash, where `python3` often isn't one):
@@ -38,7 +38,7 @@ sh ${CLAUDE_PLUGIN_ROOT}/scripts/py.sh ${CLAUDE_PLUGIN_ROOT}/tools/doctor.py --j
   - Ubuntu/Debian: it's almost always there; if not, the user runs `sudo apt install -y python3`
     in a terminal (you can't answer sudo's password prompt).
 - **OpenSCAD missing:** say so in one line with the `openscad.install.describe` text it reports,
-  and ask in the same message as the printer question whether to install it. On yes, run
+  and ask whether to install it before the printer question. On yes, run
   `sh ${CLAUDE_PLUGIN_ROOT}/scripts/py.sh ${CLAUDE_PLUGIN_ROOT}/tools/doctor.py --install`.
   It needs no admin rights: Homebrew on a Mac that has it, otherwise the official snapshot from
   files.openscad.org (about 80-100 MB, SHA-256 checked) into a per-user folder. The download
@@ -52,33 +52,53 @@ sh ${CLAUDE_PLUGIN_ROOT}/scripts/py.sh ${CLAUDE_PLUGIN_ROOT}/tools/doctor.py --j
 - **Slicers:** use the detected one as the default slicer and fill `open_command`. Several found:
   name them in your question and let the user say which.
   None found: the viewer saves `.3mf` files instead; don't install one.
-- **Portless** present: offer `server.launcher = "portless"`. Absent: leave `"plain"`, don't mention it.
+- **Portless** (`portless` true or false): never switch it on silently. Ask about it in step 5 below.
 - Use the reported `python.path` and `openscad.path` for the rest of setup. When OpenSCAD isn't
   on PATH (`on_path` false), commands in the skills that say `openscad` mean that path; new
   sessions are told so automatically.
 
-Then ask in one plain chat message. Do not use AskUserQuestion here, and never list printer
-models to pick from: there are hundreds of printers, plates and materials, and a short menu of
-guesses steers people toward the ones listed. Having a slicer installed says nothing certain
-about the printer.
+Then ask in plain chat, one short question per message, and wait for each answer. Do not use
+AskUserQuestion, and never list printer models to pick from: there are hundreds of printers,
+plates and materials, and a short menu of guesses steers people toward the ones listed. Having
+a slicer installed says nothing certain about the printer.
 
-Only the printer is required. Everything else has a default the user can change in the same
-reply. Ask something like:
+Start by saying in one line what you found (OpenSCAD, slicer) and that there are six quick
+questions. Number each one ("2 of 6"). Every question after the first states its default, so
+"yes" or "ok" accepts it. Take in anything they volunteer early and skip the questions it
+already answers.
 
-> What printer do you have?
-> I'll assume a 0.4 mm nozzle, PLA, <detected slicer, or "no slicer found, so plates are saved
-> as files"> and all the house rules on. Tell me anything that's different.
+1. **Printer.** "What printer do you have?" Look up its bed size X × Y × Z mm and say it back in
+   your next message ("Bed 250 × 210 × 220 mm, right?" can share a message with question 2).
+   Unknown, modified or home-built: ask for the size.
+2. **Nozzle and plate.** "Which nozzle do you print with? I'll assume 0.4 mm. And which build
+   plate, if you want it noted?" Other nozzles they mention go in `other_nozzles_mm`.
+3. **Slicer.** One found: "I found <slicer>. Use it for the viewer's Open button?" Several
+   found: name them and ask which. None: say plates will be saved as files, and ask which
+   slicer they use so it's noted.
+4. **Materials.** "Which filaments do you have? I'll assume PLA only." The first is the default.
+5. **Viewer address (Portless).** Explain it in plain words, with both addresses, then ask:
 
-Then:
+   > The 3D viewer opens in your browser from a small server on your own computer. Normally
+   > its address is a number that changes every time:
+   > `http://127.0.0.1:53817`
+   > Portless is a free, optional tool that gives it a steady, named address instead:
+   > `https://coaster-viewer.localhost`
+   > Both show the same page, and neither is reachable from outside your computer.
 
-1. Look up the bed size X × Y × Z mm from the model. Unknown, modified or home-built: ask for it.
-2. Show what you'll write as one short list: printer and bed size, nozzle, plate (blank if they
-   didn't say), slicer, materials, and the rules by name (ask before any print, open the slicer
-   only when asked, Gridfinity outline-first gate, offer fit tests first, commit after changes).
-   Ask "Write this?" in plain text and change whatever they correct.
-3. Don't ask about other nozzles, slicer preset names, taste, their name or reply style. Fill in
-   what they volunteered, leave the rest at the defaults, and say in one line that running
-   setup again changes any of it.
+   - Portless found: "You already have Portless. Use it?" Default yes.
+   - Not found: "Want me to install it, or keep the plain address?" Default: keep the plain
+     address. On yes, run `npm install -g portless`; without `npm`, say it needs Node.js and
+     keep `"plain"`. Say that its first run may ask for their computer password once, to trust
+     its local certificate.
+
+   Yes sets `server.launcher` to `"portless"`; anything else leaves `"plain"`.
+6. **House rules.** List them by name, one line each, all on: ask before any print, open the
+   slicer only when asked, Gridfinity outline-first gate, offer fit tests first, commit after
+   changes. "Switch any off?"
+
+Then show what you'll write as one short list and ask "Write this?" Change whatever they
+correct. Don't ask about slicer preset names, taste, their name or reply style: fill in what
+they volunteered, and say in one line that running setup again changes any of it.
 
 ## 3. Slicer open command
 

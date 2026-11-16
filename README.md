@@ -196,8 +196,7 @@ Already installed? These are for later:
 
 For `https://<name>.localhost` viewer URLs instead of a port number:
 
-1. Install [Portless](https://github.com/vercel-labs/portless): `npm install -g portless`
-2. Run `/print-kit:setup` again and say yes when it offers Portless.
+Setup explains [Portless](https://github.com/vercel-labs/portless) and offers to install it. To add it later, run `/print-kit:setup` again, or install it yourself with `npm install -g portless`.
 
 </details>
 

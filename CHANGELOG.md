@@ -1,6 +1,9 @@
 # Changelog
 
 ## 2026-11-16
+- Setup: now six short questions, one per message (printer, nozzle and plate, slicer, materials,
+  viewer address, house rules), each with a stated default. Portless is explained with a
+  before and after address and is never switched on without asking; setup offers to install it.
 - Setup: asks one plain question ("What printer do you have?") with stated defaults, then shows
   the profile and asks before writing. It no longer uses multiple-choice menus or offers printer
   models to pick from: a first run listed only Bambu printers because Bambu Studio was installed.
