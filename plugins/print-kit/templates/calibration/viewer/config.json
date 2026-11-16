@@ -2,10 +2,10 @@
   "title": "Calibration gauge",
   "scad": "calibration.scad",
   "up": "z",
-  "facts": [["Plate", "80 × 32 × 4 mm"], ["Key", "8 mm, 20 mm tall"], ["Gaps tested", "0.05 to 0.40 mm per side"]],
+  "facts": [["Plate", "80 × 32 × 4 mm"], ["Key", "8 mm, 20 mm tall"], ["Gaps tested", "0.05 to 0.40 mm per side"], ["Shown", "Key in use, round end in the 4-dot hole. They print separately."]],
   "assembly": [
     { "id": "gauge", "name": "Gauge plate", "color": "#4263eb", "scad": { "part": "gauge" }, "qty": 1, "material": "PLA" },
-    { "id": "key", "name": "Key", "color": "#f08c00", "scad": { "part": "key" }, "instances": [{ "pos": [42.5, 8.5, 20], "rot": [180, 0, 0] }], "explode": [0, 0, 25], "qty": 1, "material": "PLA" }
+    { "id": "key", "name": "Key", "color": "#f08c00", "scad": { "part": "key" }, "instances": [{ "pos": [46.25, 8.5, 20], "rot": [180, 0, 0] }], "explode": [0, 0, 25], "qty": 1, "material": "PLA" }
   ],
   "plates": [{ "id": "calibration", "name": "Calibration", "note": "Both parts flat on the bed, no supports. Use the nozzle, filament and settings you normally print with: the piece measures them." }],
   "print": [
