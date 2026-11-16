@@ -204,6 +204,30 @@ Setup explains [Portless](https://github.com/vercel-labs/portless) and offers to
 Every push is tested on fresh macOS, Windows and Ubuntu machines: OpenSCAD install, model checks,
 viewer build, the trace and layout editors, and the session hook.
 
+## Update and remove
+
+Update, in a terminal, then restart Claude Code:
+
+```
+claude plugin marketplace update print-kit
+claude plugin update print-kit@print-kit
+```
+
+Remove:
+
+```
+claude plugin uninstall print-kit@print-kit
+claude plugin marketplace remove print-kit
+```
+
+What print-kit puts on your computer, all of it yours to keep or delete:
+
+- `print-kit.json` and a `data/` folder in your projects folder (or `~/.config/print-kit/` for a user-wide profile).
+- One folder per project you design.
+- OpenSCAD, only if you let setup install it and Homebrew didn't: `~/Library/Application Support/print-kit` on macOS, `%LOCALAPPDATA%\print-kit` on Windows, `~/.local/share/print-kit` on Linux.
+
+Your models, measurements and profile stay on your computer. The viewer runs there too and can't be reached from outside it. Two things go online: the pages load their fonts from Google Fonts, and setup downloads OpenSCAD if you ask it to.
+
 ## The 3D viewer
 
 <picture>

@@ -1,6 +1,9 @@
 # Changelog
 
 ## 2026-11-16
+- Setup ends with three example requests, so a new user knows what to type next.
+- README: how to update and remove, and what print-kit writes to disk.
+- GitHub issue forms for bugs (asks for doctor output, system, printer, slicer) and ideas.
 - Calibration print: a ready-made gauge (`templates/calibration/`: an 80 × 32 × 4 mm plate with six
   round holes and six square sockets at 0.05 to 0.40 mm per side, and an 8 mm key). Setup offers it
   as an optional last step; the user reports which holes fit by counting dots, no calipers needed.

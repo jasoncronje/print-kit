@@ -158,6 +158,21 @@ After the profile is written, suggest it once, in plain words, as its own messag
 - **Later** or **skip**: fine. Say that fits start from typical values for now, and that
   "calibrate my printer" starts it any time.
 
+## 6. Finish with what to try
+
+End setup with a short "try one of these" list, so the user knows what to type next. Give three
+requests in their own words, sized for a first print and suited to what they told you (skip
+the Gridfinity one if nothing suggests they use it):
+
+> You're set. Type `/clear` to load your profile, then try one of these:
+> - "Make me a 95 mm coaster with a raised rim."
+> - "Design a wall hook for my headphones."
+> - "Make a Gridfinity bin for my pliers. I'll send a photo."
+>
+> Ask "show me it in 3D" at any point to see the part.
+
+If they chose to calibrate now, give this list after handing over the calibration piece.
+
 ## Notes
 
 - Never guess a bed size silently: a wrong one makes `check_scad.py` pass parts that don't fit.
