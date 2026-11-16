@@ -3,11 +3,16 @@
   <img alt="print-kit: OpenSCAD parts for your own 3D printer" src="brand/banner/banner-light.svg" width="100%">
 </picture>
 
-A Claude Code plugin for designing parametric OpenSCAD parts for your own 3D printer.
+**Design real, printable parts with AI, for the printer on your desk.**
 
-It gives Claude a set of house rules, a profile of your printer and slicer, and the workflow and tools
-that came out of designing and printing dozens of real parts: stands, docks, enclosures, mounts and
-Gridfinity bins.
+print-kit is a Claude Code plugin that teaches Claude how to design new parts and modify
+existing ones the way an experienced maker would. It works whether this is your first print or
+your thousandth.
+
+I built it from my own tried-and-tested process, the one I've used to print hundreds, if not
+thousands, of parts: stands, docks, enclosures, mounts and Gridfinity bins. Claude gets my design
+rules, a profile of your printer and slicer, and the tools to check a part before you print it.
+I hope it helps your workflow and your 3D printing journey.
 
 ## What you get
 
@@ -37,18 +42,7 @@ Install print-kit for me: read https://raw.githubusercontent.com/jasoncronje/pri
 ```
 
 Claude adds the plugin, installs Python and OpenSCAD if they're missing (no admin rights), asks
-about your printer one question at a time, and offers a small calibration print. When it's
-done, restart Claude Code and try:
-
-```
-Design a stand for my phone. Start with a fit test for the cradle.
-```
-
-```
-Show me the stand in the 3D viewer.
-```
-
-In the Claude Code desktop app the viewer opens beside the chat. In the terminal you get a link.
+about your printer one question at a time, and offers a small calibration print.
 
 <details>
 <summary><b>Install by hand</b></summary>
