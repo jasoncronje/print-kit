@@ -60,6 +60,12 @@ jobs:
           kill %1 || true
           cat server.log
 
+      - name: Calibration gauge template checks and builds
+        run: |
+          cp -R plugins/print-kit/templates/calibration tests/sample/calibration
+          $PY $T/check_scad.py tests/sample/calibration
+          $PY $T/make_viewer.py tests/sample/calibration
+
       - name: Trace and layout editors build, serve and save
         run: $PY tests/editors_test.py
 

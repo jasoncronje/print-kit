@@ -1,6 +1,12 @@
 # Changelog
 
 ## 2026-11-16
+- Calibration print: a ready-made gauge (`templates/calibration/`: an 80 × 32 × 4 mm plate with six
+  round holes and six square sockets at 0.05 to 0.40 mm per side, and an 8 mm key). Setup offers it
+  as an optional last step; the user reports which holes fit by counting dots, no calipers needed.
+  Results go to `data/fits.csv` and the profile notes, and `clearances.md` says how they replace
+  the starting values. Sessions are told whether the workspace is calibrated. Checked in CI.
+- Setup no longer says the clearances come from another person's printer.
 - Setup: strictly one question per message (bed size, nozzle and build plate are each their own),
   no fixed count, follow-ups allowed. Asks for filament brands (new `materials.brands`). The
   house-rules question is gone: the rules stay on unless the user asks.

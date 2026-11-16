@@ -143,8 +143,24 @@ doctor reported for a detected slicer; otherwise check the path exists before wr
 5. Tell the user the profile takes effect in new sessions (or after `/clear`), and show the
    few values they set in one short list.
 
+## 5. Offer the calibration print (optional)
+
+After the profile is written, suggest it once, in plain words, as its own message:
+
+> One optional step I'd recommend: a small calibration print, a plate about 80 × 32 mm with a
+> little peg. You print it, try the peg in the holes, and tell me which ones fit. That teaches
+> print-kit the exact gaps your printer needs, so parts fit the first time instead of the
+> second. Want to do it now, later, or skip it?
+
+- **Now**: follow `${CLAUDE_PLUGIN_ROOT}/skills/measure-and-fit/calibration.md` (it copies the
+  ready-made piece into `calibration/`, builds it and shows it). Then stop until they say it's
+  printed.
+- **Later** or **skip**: fine. Say that fits start from typical values for now, and that
+  "calibrate my printer" starts it any time.
+
 ## Notes
 
 - Never guess a bed size silently: a wrong one makes `check_scad.py` pass parts that don't fit.
-- The clearances in the `scad-design` skill come from one person's Bambu P2S with PLA on a 0.4
-  nozzle. Say so once, and say their own `data/fits.csv` replaces them as they test fits.
+- Until they calibrate, clearances are starting values measured with PLA on a 0.4 mm nozzle.
+  Say it as "fits start from typical values until you calibrate". Never describe the values as
+  coming from another person's printer.

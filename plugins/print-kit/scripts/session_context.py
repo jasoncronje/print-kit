@@ -36,12 +36,26 @@ def profile_summary(p):
         f"- Data folder: {p['data_dir']}; pages served with launcher '{p['server']['launcher']}'",
         "- Rules: " + ", ".join(f"{k}={v}" for k, v in rules.items()),
         machine(),
+        calibration(p),
     ]
     if p["taste"]:
         lines.append("- Taste (beats the default taste list):\n" + "\n".join(f"  - {t}" for t in p["taste"]))
     if p["notes"]:
         lines.append("- Notes:\n" + "\n".join(f"  - {t}" for t in p["notes"]))
     return "\n".join(lines)
+
+
+def calibration(p):
+    """Whether the workspace's fits.csv holds calibration-gauge results."""
+    done = False
+    if p["_root"]:
+        fits = Path(p["_root"]) / p["data_dir"] / "fits.csv"
+        if fits.is_file():
+            done = any(",calibration," in line for line in fits.read_text(encoding="utf-8").splitlines())
+    if done:
+        return "- Calibration: done (rows with project `calibration` in fits.csv; see the profile notes)"
+    return ("- Calibration: not done, so clearances are typical starting values. When a fit matters, "
+            "offer the calibration print once (`measure-and-fit` skill, calibration.md)")
 
 
 def machine():

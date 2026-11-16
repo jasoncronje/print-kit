@@ -12,6 +12,7 @@ Gridfinity bins.
 ## What you get
 
 - **Setup for your printer.** One command asks about your printer, slicer and materials, then every part is sized for them.
+- **Calibrated to your printer.** An optional small test print teaches it the gaps your own printer needs, so parts fit the first time.
 - **Design rules.** Claude follows tested clearances, printable shapes and a self-check before handing a part over.
 - **Fit tests.** Small, fast test prints for snaps, pockets and plugs, with the results remembered for next time.
 - **Model checks.** Every part is checked for bed fit, a flat first layer, overhangs and collisions.

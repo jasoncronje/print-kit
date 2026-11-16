@@ -12,10 +12,28 @@ row. This page is the summary and the rules for when there's no row yet.
   above the object), so keep traced clearances modest.
 - Caliper size beats a traced size beats a spec size. When they disagree, use the caliper value.
 
-## Starting values (the author's Bambu P2S, PLA, 0.4 nozzle)
+## Starting values (PLA, 0.4 nozzle, before calibration)
 
 Use these only until the user's own `data/fits.csv` has a row for the same kind, nozzle and
-material. Other printers, nozzles and materials may differ: offer a ladder for anything critical.
+material. They were measured on one printer (a Bambu P2S); others differ. Offer the calibration
+print (`measure-and-fit` skill, `calibration.md`) or a ladder for anything critical. To the
+user, call them "typical starting values", not someone else's.
+
+## After calibration
+
+Rows with project `calibration` in `data/fits.csv` (and the "Calibrated ..." line in the
+profile notes) give this printer's own gaps for an 8 mm key: round snug, round free, shaped
+snug, shaped free. Use them like this:
+
+- **Same kind of fit**: use the calibrated number directly. Round peg or object that must hold:
+  round snug. Round object that drops in and lifts out: round free. Key, plug or other shaped
+  part that must hold: shaped snug. Shaped part that drops in: shaped free.
+- **Other rows of the table below**: shift them. Round rows move by (round snug − 0.05), every
+  other row by (shaped snug − 0.15). Never go below 0.05. This is an estimate from one small
+  key, so still offer a fit test for anything critical or much larger than 8 mm.
+- A direct row for the same kind of fit always beats both.
+- Calibration is per nozzle and material. No calibration rows for the nozzle in use: treat the
+  printer as uncalibrated for that part and say so.
 
 | Fit | Start at | Evidence |
 |---|---|---|

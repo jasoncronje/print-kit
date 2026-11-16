@@ -1,6 +1,6 @@
 ---
 name: measure-and-fit
-description: Get the real sizes of an object to print for (spec lookup, then caliper requests on a local page with one drawing per measurement), design small fit-test pieces and clearance ladders, and record measurements and fit results in the workspace data folder (objects/, fits.csv, prints.csv). Use when a design needs dimensions of a real object, when a fit is critical (snaps, pockets, plugs, keys, bezels), when the user reports how a test print fit, or when a print came out wrong.
+description: Get the real sizes of an object to print for (spec lookup, then caliper requests on a local page with one drawing per measurement), design small fit-test pieces and clearance ladders, and record measurements and fit results in the workspace data folder (objects/, fits.csv, prints.csv). Use when a design needs dimensions of a real object, when a fit is critical (snaps, pockets, plugs, keys, bezels), when the user reports how a test print fit, when the user wants to calibrate print-kit to their printer or says the calibration piece is printed, or when a print came out wrong.
 ---
 
 # Measuring and fit testing
@@ -37,6 +37,12 @@ a standoff 11.75 not 11.5.
 
 Outline-shaped objects (tools in Gridfinity bins): the photo-trace editor, in the `gridfinity-bin` skill.
 Side profiles and inner contours (between handles) can be traced the same way.
+
+## Calibrating the printer
+
+The ready-made calibration gauge gives the user's own snug and free gaps for round and shaped
+fits, with no calipers. Offering it, the questions to ask after the print and how to record the
+answers: `calibration.md` in this folder.
 
 ## Fit-test pieces
 
